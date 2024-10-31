@@ -46,15 +46,16 @@ public class Maze
             }
             else
             {
+                //Generates the probability of break walls in the last cell before a backtracking
                 while (true)
                 {
-                    var walls = GetWalls(current);
-                    if (walls.Count > 0)
+                    neighbors = GetNeighborsWithWall(current);
+                    if (neighbors.Count > 0)
                     {
                         if (Random.Next(0, 1) == 0)
                         {
-                            var wall = walls[Random.Next(0, walls.Count - 1)];
-                            current.Walls[wall] = false;
+                            var neighbor = neighbors[Random.Next(0, neighbors.Count - 1)];
+                            this.BreakWall(current.X, current.Y, neighbor.X, neighbor.Y);
                             continue;
                         }
                     }  
@@ -74,13 +75,13 @@ public class Maze
         return neighbors;
     }
 
-    private List<string> GetWalls(Cell cell)
+    private List<Cell> GetNeighborsWithWall(Cell cell)
     {
         var neighbors = new List<string>();
-        if (cell.X > 0 && cell.Walls["left"])  neighbors.Add("left");
-        if (cell.X < Width - 1 && cell.Walls["right"]) neighbors.Add("right");
-        if (cell.Y > 0 && cell.Walls["top"]) neighbors.Add("top");
-        if (cell.Y < Height - 1 && cell.Walls["bottom"]) neighbors.Add("bottom");
+        if (cell.X > 0 && cell.Walls["left"])  neighbors.Add(Grid[cell.X - 1, cell.Y]);
+        if (cell.X < Width - 1 && cell.Walls["right"]) neighbors.Add(Grid[cell.X + 1, cell.Y]);
+        if (cell.Y > 0 && cell.Walls["top"]) neighbors.Add(Grid[cell.X, cell.Y - 1]);
+        if (cell.Y < Height - 1 && cell.Walls["bottom"]) neighbors.Add(Grid[cell.X, cell.Y + 1]);
         return neighbors;
     }
 
