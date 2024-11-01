@@ -1,4 +1,4 @@
-﻿namespace MazeRuner.Core.Maze;
+﻿namespace MazeRunner.Core.Maze;
 
 public class Cell
 {

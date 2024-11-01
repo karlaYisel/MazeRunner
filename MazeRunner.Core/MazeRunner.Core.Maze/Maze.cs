@@ -1,4 +1,4 @@
-namespace MazeRuner.Core.Maze;
+namespace MazeRunner.Core.Maze;
 
 public class Maze
 {
@@ -15,6 +15,7 @@ public class Maze
         this.InitializeGrid();
         this.GenerateMaze();
     }
+    
     private void InitializeGrid()
     {
         for (int x = 0; x < Width; x++)
@@ -77,7 +78,7 @@ public class Maze
 
     private List<Cell> GetNeighborsWithWall(Cell cell)
     {
-        var neighbors = new List<string>();
+        var neighbors = new List<Cell>();
         if (cell.X > 0 && cell.Walls["left"])  neighbors.Add(Grid[cell.X - 1, cell.Y]);
         if (cell.X < Width - 1 && cell.Walls["right"]) neighbors.Add(Grid[cell.X + 1, cell.Y]);
         if (cell.Y > 0 && cell.Walls["top"]) neighbors.Add(Grid[cell.X, cell.Y - 1]);

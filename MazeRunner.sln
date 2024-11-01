@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeRuner.Core", "MazeRuner.Core\MazeRuner.Core.csproj", "{E608441E-83A4-4A09-9A21-9D197DAFCE46}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeRunner.Core", "MazeRunner.Core\MazeRunner.Core.csproj", "{E608441E-83A4-4A09-9A21-9D197DAFCE46}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
