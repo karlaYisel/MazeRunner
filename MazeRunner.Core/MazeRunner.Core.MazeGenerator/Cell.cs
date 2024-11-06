@@ -1,9 +1,13 @@
-﻿namespace MazeRunner.Core.Maze
+﻿using System;
+using MazeRunner.Core.InteractiveObjects;
+
+namespace MazeRunner.Core.MazeGenerator
 {
     public class Cell
     {
         public int X {get; private set;} 
         public int Y {get; private set;}
+        public Interactive? Interactive {get; internal set;} 
         internal bool isVisited;
         public Dictionary<string, bool> Walls = new Dictionary<string, bool>
         {
@@ -12,9 +16,6 @@
             { "bottom", true },
             { "left", true }
         };
-    
-        //TODO: La clase de interactuables en lugar de usar objetos
-        internal object? Interactive {get; private set;} 
     
         public Cell(int X, int Y)
         {

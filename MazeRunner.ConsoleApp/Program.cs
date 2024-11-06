@@ -1,6 +1,8 @@
 ﻿using System;
 using MazeRunner.Core;
-using MazeRunner.Core.Maze;
+using MazeRunner.Core.MazeGenerator;
+using MazeRunner.Core.InteractiveObjects;
+using System.Threading;
 
 namespace MazeRunner.ConsoleApp
 {
@@ -8,30 +10,93 @@ namespace MazeRunner.ConsoleApp
     {
         public static void Main(string[] args)
         {
+            string? console;
+            Maze maze;
+            int[,] matriz;
+
             while (true)
             {
-                Console.WriteLine("Generar Laberinto: 0");
-                string? console = Console.ReadLine();
-                if (console == null)
+                Console.Clear();
+                Console.WriteLine("Salir: 0");
+                Console.WriteLine("Generar Laberinto: 1");
+                console = Console.ReadLine();
+                if (string.IsNullOrEmpty(console))
                 {
                     Console.WriteLine("Debes poner una opción válida.");
+                    Thread.Sleep(1000);
                     continue;
                 }
-                
+
                 int option = int.Parse(console);
                 
-                if (option != 0)
+                switch (option)
+                {
+                    case 0:
+                        return;
+                    case 1:
+                        maze = new Maze(10, 10, 10, 10);
+                        break;
+                    default:
+                        Console.WriteLine("Debes poner una opción válida.");
+                        Thread.Sleep(1000);
+                        continue;
+                }
+
+                break;
+            }
+            
+            while (true)
+            {
+                Console.Clear();
+                
+                matriz = GenerateAssosiatedMatriz(maze);
+                PrintMaze(matriz);
+
+                Console.WriteLine("Salir: 0");
+                Console.WriteLine("Regenerar Laberinto: 1");
+                Console.WriteLine("Verificar Casilla: 2");
+                console = Console.ReadLine();
+                if (string.IsNullOrEmpty(console))
                 {
                     Console.WriteLine("Debes poner una opción válida.");
+                    Thread.Sleep(1000);
                     continue;
                 }
-                else
+
+                int option = int.Parse(console);
+                switch (option)
                 {
-                    //Console.Clear();
-                    Maze maze = new Maze(10, 10);
-                    maze.GenerateMaze();
-                    int[,] matriz = GenerateAssosiatedMatriz(maze);
-                    PrintMaze(matriz);
+                    case 0:
+                        return;
+                    case 1:
+                        maze.RegenerateMaze();
+                        continue;
+                    case 2:
+                        while (true)
+                        {
+                            Console.Write("X: ");
+                            string? X  = Console.ReadLine();
+                            Console.Write("\nY: ");
+                            string? Y = Console.ReadLine();
+                            if (string.IsNullOrEmpty(X) || string.IsNullOrEmpty(Y)) 
+                            {
+                                Console.WriteLine("Debes poner una opción válida.");
+                                Thread.Sleep(1000);
+                                continue;
+                            }
+                            
+                            int x = int.Parse(X);
+                            int y = int.Parse(Y);
+                            Cell cell = maze.Grid[x, y];
+                            Console.WriteLine("Es {0}", cell.Interactive?.GetType().ToString());
+                            Thread.Sleep(1000);
+                            break;
+                        }
+                        break;
+                    default:
+                        Console.WriteLine("Debes poner una opción válida.");
+                        Thread.Sleep(1000);
+                        continue;
                 }
             }
         }
@@ -44,14 +109,29 @@ namespace MazeRunner.ConsoleApp
                 for (int y = 0; y < maze.Grid.GetLength(1); y++)
                 {
                     Cell cell = maze.Grid[x, y];
+                    string? typeInteractive = cell.Interactive?.GetType().Name;
 
+                    //Build walls
                     if (cell.X == 0) { matriz[0, 2*(cell.Y)] = matriz[0, 2*(cell.Y) + 1] = matriz[0, 2*(cell.Y) + 2] = 1; }
                     if (cell.Y == 0) { matriz[2*(cell.X), 0] = matriz[2*(cell.X) + 1, 0] = matriz[2*(cell.X) + 2, 0] = 1; }
                     if (cell.Walls["right"]) { matriz[2*(cell.X) + 2, 2*(cell.Y)] = matriz[2*(cell.X) + 2, 2*(cell.Y) + 1] = matriz[2*(cell.X) + 2, 2*(cell.Y) + 2] = 1; }
                     else { matriz[2*(cell.X) + 2, 2*(cell.Y) + 1] = 0; matriz[2*(cell.X) + 2, 2*(cell.Y) + 2] = 0; }
                     if (cell.Walls["bottom"]) { matriz[2*(cell.X), 2*(cell.Y) + 2] = matriz[2*(cell.X) + 1, 2*(cell.Y) + 2] = matriz[2*(cell.X) + 2, 2*(cell.Y) + 2] = 1; }
                     else { matriz[2*(cell.X) + 1, 2*(cell.Y) + 2] = 0; }
-                    matriz[2*(cell.X) + 1, 2*(cell.Y) + 1] = 2;
+
+                    //Determine what the cell contains and build it
+                    switch (typeInteractive)
+                    {
+                        case "NPC":
+                            matriz[2*(cell.X) + 1, 2*(cell.Y) + 1] = 3;
+                            break;
+                        case "SpikeTrap":
+                            matriz[2*(cell.X) + 1, 2*(cell.Y) + 1] = 4;
+                            break;
+                        default:
+                            matriz[2*(cell.X) + 1, 2*(cell.Y) + 1] = 2;
+                            break;
+                    }
                 }
             }
             return matriz;
@@ -60,25 +140,31 @@ namespace MazeRunner.ConsoleApp
         public static void PrintMaze(int[,] matriz)
         {
             Console.WriteLine("");
-            for (int x = 0; x < matriz.GetLength(0); x++)
+            for (int y = 0; y < matriz.GetLength(1); y++)
             {
                 string row = "    ";
     
-                for (int y = 0; y < matriz.GetLength(1); y++)
+                for (int x = 0; x < matriz.GetLength(0); x++)
                 {
                     switch (matriz[x,y])
                     {
                         case 0:
-                            row += " ";
+                            row += "   ";
                             break;
                         case 1:
-                            row += "□";
+                            row += "███";
                             break;
                         case 2:
-                            row += "·";
+                            row += " · ";
+                            break;
+                        case 3:
+                            row += " ֍ ";
+                            break;
+                        case 4:
+                            row += " ʘ ";
                             break;
                         default:
-                            row += " ";
+                            row += "   ";
                             break;
                     };
                 }
