@@ -12,11 +12,11 @@ namespace MazeRunner.Core.InteractiveObjects
         public bool IsStandTrap { get; protected set; }
 
         //Configurar para el jugador
-        public bool TryToTrigger(object player)
+        public bool TryToTrigger(Character character)
         {
             if (this.ActualState == State.Active)
             {
-                this.Trigger(player);
+                this.Trigger(character);
                 return true;
             }
             else
@@ -25,8 +25,7 @@ namespace MazeRunner.Core.InteractiveObjects
             }
         }
 
-        //Jugador
-        protected virtual void Trigger (object player)
+        protected virtual void Trigger (Character character)
         {
 
         }

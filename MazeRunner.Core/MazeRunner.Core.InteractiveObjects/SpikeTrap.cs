@@ -11,10 +11,12 @@ namespace MazeRunner.Core.InteractiveObjects
             this.Damage = Damage;
         }
 
-        //Jugador
-        protected override void Trigger(object player)
+        protected override void Trigger(Character character)
         {
-            
+            if (!(random.Next(0, 11 - character.Speed) == 0))
+            {
+                character.ActualLife -= 3*(this.Damage - character.Defense/2);
+            }
         }
     }
 }

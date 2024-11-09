@@ -4,6 +4,7 @@ namespace MazeRunner.Core.InteractiveObjects
     {
         Obstacle,
         Trap,
+        Character,
     }
 
     public enum State
@@ -15,6 +16,7 @@ namespace MazeRunner.Core.InteractiveObjects
     public abstract class Interactive
     {
         public State ActualState { get; protected set; }
+        protected Random random = new Random();
 
         public void ChangeState()
         {

@@ -7,6 +7,7 @@ namespace MazeRunner.Core.MazeGenerator
     {
         public int X {get; private set;} 
         public int Y {get; private set;}
+        public bool IsActive {get; private set;}
         public Interactive? Interactive {get; internal set;} 
         internal bool isVisited;
         public Dictionary<string, bool> Walls = new Dictionary<string, bool>
@@ -22,7 +23,14 @@ namespace MazeRunner.Core.MazeGenerator
             this.X = X;
             this.Y = Y;
             this.isVisited = false;
+            this.IsActive = false;
             this.Interactive = null;
+        }
+
+        public void ChangeActivity()
+        {
+            if (this.IsActive) {this.IsActive = false; }
+            else {this.IsActive = true; }
         }
     }
 }

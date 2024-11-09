@@ -34,7 +34,7 @@ namespace MazeRunner.ConsoleApp
                     case 0:
                         return;
                     case 1:
-                        maze = new Maze(10, 10, 10, 10);
+                        maze = new Maze(10, 10, 10, 10, 10);
                         break;
                     default:
                         Console.WriteLine("Debes poner una opción válida.");
@@ -50,6 +50,7 @@ namespace MazeRunner.ConsoleApp
                 Console.Clear();
                 
                 matriz = GenerateAssosiatedMatriz(maze);
+                //Agregar posicion de fichas NPC y de jugadores
                 PrintMaze(matriz);
 
                 Console.WriteLine("Salir: 0");
@@ -88,7 +89,14 @@ namespace MazeRunner.ConsoleApp
                             int x = int.Parse(X);
                             int y = int.Parse(Y);
                             Cell cell = maze.Grid[x, y];
-                            Console.WriteLine("Es {0}", cell.Interactive?.GetType().ToString());
+                            if (cell.Interactive?.GetType() is null)
+                            {
+                                Console.WriteLine("Está vacía.");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Es {0}", cell.Interactive.GetType().Name);
+                            }
                             Thread.Sleep(1000);
                             break;
                         }
@@ -122,8 +130,9 @@ namespace MazeRunner.ConsoleApp
                     //Determine what the cell contains and build it
                     switch (typeInteractive)
                     {
-                        case "NPC":
-                            matriz[2*(cell.X) + 1, 2*(cell.Y) + 1] = 3;
+                        case "TemporalWall":
+                            if (cell.Interactive is not null && cell.Interactive.ActualState == State.Active) {matriz[2*(cell.X) + 1, 2*(cell.Y) + 1] = 3; }
+                            else {matriz[2*(cell.X) + 1, 2*(cell.Y) + 1] = 2; }
                             break;
                         case "SpikeTrap":
                             matriz[2*(cell.X) + 1, 2*(cell.Y) + 1] = 4;
