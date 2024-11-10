@@ -19,8 +19,11 @@ namespace MazeRunner.Core.InteractiveObjects
         public bool ActivateAbility(Character oponent)
         {
             //Configurar para tener en cuenta los turnos
-            //Espada Sagrada quitar da;o enemigos pero mucho m'as da;o y es constante
-            //metodo de maze de obtener enemigos
+            if (oponent is Neutral neutral && !neutral.TargedCharacters.Contains(this))
+            {
+                neutral.TargedCharacters.Add(this);
+            }
+            oponent.ActualLife -= 5*(this.Streng - oponent.Defense/3);
             return true;
         }
     }

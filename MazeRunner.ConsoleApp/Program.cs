@@ -2,6 +2,7 @@
 using MazeRunner.Core;
 using MazeRunner.Core.MazeGenerator;
 using MazeRunner.Core.InteractiveObjects;
+using MazeRunner.Core.GameSystem;
 using System.Threading;
 
 namespace MazeRunner.ConsoleApp
@@ -34,7 +35,7 @@ namespace MazeRunner.ConsoleApp
                     case 0:
                         return;
                     case 1:
-                        maze = new Maze(10, 10, 10, 10, 10);
+                        maze = new Maze(10, 10, 2, false, 10, 10, 10);
                         break;
                     default:
                         Console.WriteLine("Debes poner una opción válida.");

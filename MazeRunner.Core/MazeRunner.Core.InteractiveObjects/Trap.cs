@@ -11,7 +11,6 @@ namespace MazeRunner.Core.InteractiveObjects
         //IsStandTrap == false if get trigged when the player walks over it
         public bool IsStandTrap { get; protected set; }
 
-        //Configurar para el jugador
         public bool TryToTrigger(Character character)
         {
             if (this.ActualState == State.Active)

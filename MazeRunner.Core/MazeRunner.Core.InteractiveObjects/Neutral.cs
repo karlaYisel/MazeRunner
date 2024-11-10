@@ -21,7 +21,15 @@ namespace MazeRunner.Core.InteractiveObjects
 
         override public void TakeTurn (Maze maze)
         {
-            //Usar m'etodo de obtener oponentes
+            List<Character> possibleOponents = maze.GetPossibleOponents(this.X, this.Y, maze.Players[maze.Players.Count() - 1], TypeOfAttack.Large);
+            foreach (Character character in possibleOponents)
+            {
+                if (TargedCharacters.Contains(character)) 
+                { 
+                    this.Attack(character); 
+                    return;
+                }
+            }
             this.RandomMove(maze);
         }
     }
