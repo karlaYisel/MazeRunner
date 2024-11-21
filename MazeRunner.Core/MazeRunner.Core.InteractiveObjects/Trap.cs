@@ -15,8 +15,7 @@ namespace MazeRunner.Core.InteractiveObjects
         {
             if (this.ActualState == State.Active)
             {
-                this.Trigger(character);
-                return true;
+                return this.Trigger(character);
             }
             else
             {
@@ -24,9 +23,9 @@ namespace MazeRunner.Core.InteractiveObjects
             }
         }
 
-        protected virtual void Trigger (Character character)
+        protected virtual bool Trigger (Character character)
         {
-
+            return false;
         }
     }
 }

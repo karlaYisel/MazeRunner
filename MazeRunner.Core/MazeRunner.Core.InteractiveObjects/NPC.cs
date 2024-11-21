@@ -1,5 +1,3 @@
-using MazeRunner.Core.MazeGenerator;
-
 namespace MazeRunner.Core.InteractiveObjects
 {   
     public enum TypeOfNPC
@@ -9,23 +7,24 @@ namespace MazeRunner.Core.InteractiveObjects
         Aggressive,
     }
 
-    public abstract class NPC: Character
+    public class NPC: Character
     { 
-        protected void RandomMove (Maze maze)
+        public TypeOfNPC TypeNPC { get; private set; }
+        public List<Character>? TargedCharacters { get; private set; }
+        public NPC (int x, int y, TypeOfNPC type, int MaxLife = 50, int Defense = 5, int Streng = 6, int Ability = 5, int Speed = 4)
         {
-            List<(Cell cell, int distance)> cells = maze.GetCellsInRange(this.X, this.Y, this.Speed);
-            if (random.Next(0, cells.Count + 1) == 0)
-            {
-                return;
-            }
-            else
-            {
-                (Cell cell, int distance) cellWithDistance = cells[random.Next(0, cells.Count)];
-                this.Move(cellWithDistance.cell.X, cellWithDistance.cell.Y, cellWithDistance.distance, maze);
-            }
+            this.ActualState = State.Active;
+            this.X = x;
+            this.Y = y;
+            this.TypeNPC = type;
+            if (type == TypeOfNPC.Neutral) TargedCharacters = new List<Character> ();
+            IsTargeted = false;
+            this.MaxLife = MaxLife;
+            this.ActualLife = MaxLife;
+            this.Defense = Defense;
+            this.Streng = Streng;
+            this.Ability = Ability;
+            this.Speed = Speed;
         }
-
-        virtual public void TakeTurn (Maze maze)
-        {}
     }
 }

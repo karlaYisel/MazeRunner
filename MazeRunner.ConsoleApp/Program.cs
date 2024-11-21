@@ -35,7 +35,7 @@ namespace MazeRunner.ConsoleApp
                     case 0:
                         return;
                     case 1:
-                        maze = new Maze(10, 10, 2, false, 10, 10, 10);
+                        maze = new Maze(11, 11, 10, 10, 10);
                         break;
                     default:
                         Console.WriteLine("Debes poner una opción válida.");

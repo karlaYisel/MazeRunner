@@ -16,16 +16,27 @@ namespace MazeRunner.Core.GameSystem
             this.Tokens = new List<Character>();
         }
 
-        public Player (string name, List<Character> tokens)
+        public void ChangeName (string? name)
         {
-            TextInfo ti = CultureInfo.CurrentCulture.TextInfo;
-            this.Name = ti.ToTitleCase(name);
-            this.Tokens = tokens;
+            if (!string.IsNullOrEmpty(name))
+            {
+                TextInfo ti = CultureInfo.CurrentCulture.TextInfo;
+                this.Name = ti.ToTitleCase(name);
+            }
+            else
+            {
+                this.Name = "UNKNOWN";
+            }
         }
 
         public void ChangeTokens (List<Character> tokens)
         {
             this.Tokens = tokens;
+        }
+
+        public void ClearTokens ()
+        {
+            this.Tokens.Clear();
         }
     }
 }

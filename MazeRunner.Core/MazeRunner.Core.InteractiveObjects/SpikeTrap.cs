@@ -1,3 +1,5 @@
+using System.Threading;
+
 namespace MazeRunner.Core.InteractiveObjects
 {
     public class SpikeTrap: Trap
@@ -11,12 +13,15 @@ namespace MazeRunner.Core.InteractiveObjects
             this.Damage = Damage;
         }
 
-        protected override void Trigger(Character character)
+        protected override bool Trigger(Character character)
         {
-            if (!(random.Next(0, 11 - character.Speed) == 0))
+            Thread.Sleep(100);
+            if (this.Damage - character.Defense/2 > 0 && random.Next(0, 11 - character.Speed) != 0)
             {
                 character.ActualLife -= 3*(this.Damage - character.Defense/2);
+                return true;
             }
+            return false;
         }
     }
 }

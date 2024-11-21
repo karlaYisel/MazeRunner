@@ -18,7 +18,7 @@ namespace MazeRunner.Core.InteractiveObjects
         public int AbilityRecoveryTime { get; protected set; }
         public int LastTurnUsingAbility { get; protected set; }
 
-        public bool ActivateAbility()
+        public virtual bool ActivateAbility(int turn, Character oponent)
         {
             return false;
         }

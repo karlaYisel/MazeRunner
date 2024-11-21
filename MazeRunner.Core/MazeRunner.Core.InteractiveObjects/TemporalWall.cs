@@ -6,11 +6,16 @@ namespace MazeRunner.Core.InteractiveObjects
 
         public TemporalWall(int Lapse)
         {
-            this.ActualState = State.Active;
+            this.ActualState = State.Inactive;
             this.Delay = 5;
             this.Lapse = Lapse;
         }
 
-        //Poner algo para el Lapse con los turnos
+        public void StabilizeWall(int turn)
+        {
+            turn %= 2*Delay;
+            if (turn < 0) turn += 2*Delay;
+            if ((turn < Delay && ActualState != State.Inactive) || (turn >= Delay && ActualState != State.Active)) ChangeState();
+        }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using MazeRunner.Core.InteractiveObjects;
+﻿using MazeRunner.Core.InteractiveObjects;
 
 namespace MazeRunner.Core.MazeGenerator
 {
@@ -7,7 +6,7 @@ namespace MazeRunner.Core.MazeGenerator
     {
         public int X {get; private set;} 
         public int Y {get; private set;}
-        public bool IsActive {get; private set;}
+        public bool IsColored {get; private set;}
         public Interactive? Interactive {get; internal set;} 
         internal bool isVisited;
         public Dictionary<string, bool> Walls = new Dictionary<string, bool>
@@ -23,14 +22,14 @@ namespace MazeRunner.Core.MazeGenerator
             this.X = X;
             this.Y = Y;
             this.isVisited = false;
-            this.IsActive = false;
+            this.IsColored = false;
             this.Interactive = null;
         }
 
-        public void ChangeActivity()
+        public void ChangeColorStatus()
         {
-            if (this.IsActive) {this.IsActive = false; }
-            else {this.IsActive = true; }
+            if (this.IsColored) {this.IsColored = false; }
+            else {this.IsColored = true; }
         }
     }
 }
