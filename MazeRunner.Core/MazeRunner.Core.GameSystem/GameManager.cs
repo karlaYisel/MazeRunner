@@ -18,13 +18,13 @@ namespace MazeRunner.Core.GameSystem
         public NonActiveTurnManager NATM = NonActiveTurnManager.NATM;
         public List<Player> ActivePlayers { get; private set;} = new List<Player>();
         public List<Player> NonActivePlayers { get; private set;} = new List<Player>();
-        public event PlayerMessage DefetedToken;
-        public event PlayerMessage DemagedToken;
-        public event PlayerMessage HealedToken;
-        //public event PlayerMessage TokenEffectAdd;
-        //public event PlayerMessage TokenEffectSubstract;
-        public event ChangeMaze ChangeInMazeMade;
-        public event ChangeTurn ChangeInTurnMade;
+        public event PlayerMessage? DefetedToken;
+        public event PlayerMessage? DemagedToken;
+        public event PlayerMessage? HealedToken;
+        //public event PlayerMessage? TokenEffectAdd;
+        //public event PlayerMessage? TokenEffectSubstract;
+        public event ChangeMaze? ChangeInMazeMade;
+        public event ChangeTurn? ChangeInTurnMade;
         public bool IsCoopGame { get; private set; } 
         public bool PlayWithBots { get; private set; } 
         public Maze maze { get; private set; } = new Maze(11, 11);
@@ -48,7 +48,8 @@ namespace MazeRunner.Core.GameSystem
         public int Turn { get; private set; }
 
         private GameManager()
-        {}
+        {
+        }
 
         public static GameManager GM
         {
@@ -70,23 +71,25 @@ namespace MazeRunner.Core.GameSystem
         }
 
 //Initialize properties of GM
-        public void InitializePlayers(int numberOfPlayers, string[] names)
+        public void InitializePlayers(int numberOfPlayers, string?[] names)
         {
             ActivePlayers.Clear();
             NonActivePlayers.Clear();
-            string name;
+            string? name;
             for (int i = 0; i < numberOfPlayers; i++)
             {
-                if (i >= names.Length || string.IsNullOrEmpty(names[i])) { name = "Juagador " + (i + 1).ToString(); }
-                else { name = names[i]; }
+                name = null;
+                if (i < names.Length) name = names[i];
+                if (name is null) name = "Jugador " + (i + 1).ToString();
                 this.ActivePlayers.Add(new Player(name));
             }
             for (int i = numberOfPlayers; i < 5; i++)
             {
                 if (i < 4) 
                 {
-                    if (i >= names.Length || string.IsNullOrEmpty(names[i])) { name = "Bot " + (i + 1 - numberOfPlayers).ToString(); }
-                    else { name = names[i]; }
+                    name = null;
+                    if (i < names.Length) name = names[i];
+                    if (name is null) name = "Bot " + (i + 1 - numberOfPlayers).ToString();
                 }
                 else
                 {
@@ -118,28 +121,28 @@ namespace MazeRunner.Core.GameSystem
 //Events Manager
         public void EventDefetedToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
         {
-            DefetedToken(affectedCharacter, modificaterObject, modificator);
+            DefetedToken?.Invoke(affectedCharacter, modificaterObject, modificator);
         }
 
         public void EventDemagedToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
         {
-            DemagedToken(affectedCharacter, modificaterObject, modificator);
+            DemagedToken?.Invoke(affectedCharacter, modificaterObject, modificator);
         }
 
         public void EventHealedToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
         {
-            HealedToken(affectedCharacter, modificaterObject, modificator);
+            HealedToken?.Invoke(affectedCharacter, modificaterObject, modificator);
         }
 
         public void EventChangeInMazeMade()
         {
-            ChangeInMazeMade();
+            ChangeInMazeMade?.Invoke();
         }
 
         public void EventPassTurn()
         {
             Turn++;
-            ChangeInTurnMade(Turn);
+            ChangeInTurnMade?.Invoke(Turn);
         }
 
     }

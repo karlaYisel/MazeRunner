@@ -27,6 +27,13 @@ namespace MazeRunner.Core.MazeGenerator
             }
         }
 
+        public void RegenerateMaze()
+        {
+            CleanCells();
+            RegenerateWalls();
+            GenerateMaze();
+        }
+
         public void CleanCells()
         {
             Cell cell;
@@ -37,11 +44,12 @@ namespace MazeRunner.Core.MazeGenerator
                 {
                     cell = Grid[x, y];
                     cell.Interactive = null;
+                    if (cell.IsColored == true) cell.ChangeColorStatus();
                 }
             }
         }
         
-        public void RegenerateMaze()
+        public void RegenerateWalls()
         {
             Cell cell;
 
@@ -54,10 +62,23 @@ namespace MazeRunner.Core.MazeGenerator
                     cell.Walls["top"] = cell.Walls["right"] = cell.Walls["bottom"] = cell.Walls["left"] = true;
                 }
             }
-
-            this.GenerateMaze();
         }
     
+        public void CleanWalls()
+        {
+            Cell cell;
+
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    cell = Grid[x, y];
+                    cell.isVisited = true;
+                    cell.Walls["top"] = cell.Walls["right"] = cell.Walls["bottom"] = cell.Walls["left"] = false;
+                }
+            }
+        }
+
         private void GenerateMaze()
         {
             Cell start = Grid[0, 0];

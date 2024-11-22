@@ -30,6 +30,7 @@ namespace MazeRunner.Core.InteractiveObjects
                 NonPlayable.TargedCharacters.Add(this);
             }
             oponent.ActualLife -= 5*(this.Streng - oponent.Defense/3);
+            LastTurnUsingAbility = turn;
             return true;
         }
     }

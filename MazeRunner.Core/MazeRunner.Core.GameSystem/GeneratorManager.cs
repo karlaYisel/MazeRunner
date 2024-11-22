@@ -53,7 +53,6 @@ namespace MazeRunner.Core.GameSystem
                     for (int y = 0; y < GM.maze.Height; y++)
                     {
                         actualCell  = GM.maze.Grid[x, y];
-
                         if (actualCell.Interactive is null && !GM.StartPoints.Contains(actualCell) && !GM.EndPoints.Contains(actualCell)) {emptyCells.Add(actualCell);}
                     }
                 }
@@ -97,7 +96,7 @@ namespace MazeRunner.Core.GameSystem
 
         public bool TryGenerateNPCs(int numberOfNPCs)
         {
-            int NumberInteractive = GM.ActualNumberOfInteractives + GM.NumberOfPlayableTokens + GM.NumberOfNonPlayableTokens;
+            int NumberInteractive = GM.ActualNumberOfInteractives + 2*GM.NumberOfPlayableTokens + 2*GM.NumberOfNonPlayableTokens;
             if (NumberInteractive + numberOfNPCs + GM.EndPoints.Count > GM.maze.Width*GM.maze.Height) return false;
             List<Cell> emptyCells = [];
             Cell actualCell;
@@ -120,7 +119,7 @@ namespace MazeRunner.Core.GameSystem
                     GM.NonActivePlayers[GM.NonActivePlayers.Count - 1].Tokens.Add(NonPlayable);
                     actualCell.Interactive = null;
                 }
-                emptyCells.Remove(actualCell);
+                if (GM.AM.GetCharactersInCell(actualCell).Count > 1) emptyCells.Remove(actualCell);
             }
             return true;
         }
@@ -144,6 +143,7 @@ namespace MazeRunner.Core.GameSystem
                 Cell startCell = GM.MM.TokenInitialPosition(token);
                 if (!GM.maze.IsOfThisMaze(startCell)) return false;
                 playable.ChangePosition(startCell.X, startCell.Y);
+                GM.ChangeInTurnMade += token.NewTurn;
             }
             return true;
         }

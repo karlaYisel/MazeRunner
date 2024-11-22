@@ -295,6 +295,7 @@ namespace MazeRunner.Core.GameSystem
                 Thread.Sleep(50);
                 cell = path.Dequeue();
                 if (cell.IsColored == true) cell.ChangeColorStatus();
+                GM.EventChangeInMazeMade();
             }
         }
     }

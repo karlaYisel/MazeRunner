@@ -198,6 +198,7 @@ namespace MazeRunner.Core.GameSystem
             {
                 if(character.IsTargeted == false) character.ChangeTargetStatus();
             }
+            GM.EventChangeInMazeMade();
         }
 
         public void CleanTargets()
@@ -210,6 +211,7 @@ namespace MazeRunner.Core.GameSystem
                     if(token.IsTargeted == true) token.ChangeTargetStatus();
                 }
             }
+            GM.EventChangeInMazeMade();
         }
     }
 }
