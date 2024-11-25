@@ -8,9 +8,9 @@ namespace MazeRunner.Core.InteractiveObjects
         public int Y { get; protected set;}
         public bool IsTargeted { get; protected set;}
         public int MaxLife { get; protected set; }
-        public int ActualLife; 
+        public int CurrentLife; 
         public int Defense { get; protected set; }
-        public int Streng { get; protected set; }
+        public int Strength { get; protected set; }
         public int Ability { get; protected set; }
         public int Speed { get; protected set; }
 
@@ -26,16 +26,16 @@ namespace MazeRunner.Core.InteractiveObjects
             this.Y = y;
         }
 
-        public bool Attack(Character oponent)
+        public bool Attack(Character opponent)
         {
             Thread.Sleep(100);
-            if (this.Ability - oponent.Speed/2 > 1 && random.Next(0, this.Ability - oponent.Speed/2) != 0 && this.Streng - oponent.Defense/2 > 0)
+            if (this.Ability - opponent.Speed/2 > 1 && random.Next(0, this.Ability - opponent.Speed/2) != 0 && this.Strength - opponent.Defense/2 > 0)
             {
-                if (oponent is NPC neutral && neutral.TargedCharacters is not null && !neutral.TargedCharacters.Contains(this))
+                if (opponent is NPC neutral && neutral.TargedCharacters is not null && !neutral.TargedCharacters.Contains(this))
                 {
                     neutral.TargedCharacters.Add(this);
                 }
-                oponent.ActualLife -= 5*(this.Streng - oponent.Defense/2);
+                opponent.CurrentLife -= 5*(this.Strength - opponent.Defense/2);
                 return true;
             }
             else

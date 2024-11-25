@@ -18,7 +18,7 @@ namespace MazeRunner.Core.InteractiveObjects
             Thread.Sleep(100);
             if (this.Damage - character.Defense/2 > 0 && random.Next(0, 11 - character.Speed) != 0)
             {
-                character.ActualLife -= 3*(this.Damage - character.Defense/2);
+                character.CurrentLife -= 3*(this.Damage - character.Defense/2);
                 return true;
             }
             return false;

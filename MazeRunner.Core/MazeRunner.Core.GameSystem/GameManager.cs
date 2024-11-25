@@ -4,6 +4,7 @@ using MazeRunner.Core.MazeGenerator;
 namespace MazeRunner.Core.GameSystem
 {
     public delegate void PlayerMessage(Character affectedCharacter, Interactive? modificaterObject, int modificator);
+    public delegate void PlayerVictory(Player player);
     public delegate void ChangeTurn(int turn);
     public delegate void ChangeMaze();
 
@@ -11,11 +12,6 @@ namespace MazeRunner.Core.GameSystem
     {
         private static GameManager? _GM;
         private static readonly object _lock = new object();
-        private Random random= new Random();
-        public GeneratorManager GeM = GeneratorManager.GeM;
-        public MovementManager MM = MovementManager.MM;
-        public AttackManager AM = AttackManager.AM;
-        public NonActiveTurnManager NATM = NonActiveTurnManager.NATM;
         public List<Player> ActivePlayers { get; private set;} = new List<Player>();
         public List<Player> NonActivePlayers { get; private set;} = new List<Player>();
         public event PlayerMessage? DefetedToken;
@@ -23,6 +19,7 @@ namespace MazeRunner.Core.GameSystem
         public event PlayerMessage? HealedToken;
         //public event PlayerMessage? TokenEffectAdd;
         //public event PlayerMessage? TokenEffectSubstract;
+        public event PlayerVictory? PlayerWon;
         public event ChangeMaze? ChangeInMazeMade;
         public event ChangeTurn? ChangeInTurnMade;
         public bool IsCoopGame { get; private set; } 
@@ -114,8 +111,6 @@ namespace MazeRunner.Core.GameSystem
             ActualNumberOfInteractives = 0;
             NumberOfTokensByPlayers = numberOfTokens;
             Turn = 0;
-            GeM.TryGenerateInteractiveObjects(numberOfObstacles, numberOfTraps);
-            GeM.TryGenerateNPCs(numberOfNPCs);
         }
 
 //Events Manager
@@ -134,6 +129,11 @@ namespace MazeRunner.Core.GameSystem
             HealedToken?.Invoke(affectedCharacter, modificaterObject, modificator);
         }
 
+        public void EventPlayerWon(Player player)
+        {
+            PlayerWon?.Invoke(player);
+        }
+
         public void EventChangeInMazeMade()
         {
             ChangeInMazeMade?.Invoke();
@@ -143,6 +143,99 @@ namespace MazeRunner.Core.GameSystem
         {
             Turn++;
             ChangeInTurnMade?.Invoke(Turn);
+        }
+
+//General methods
+        public List<Character> GetCharactersInCell(Cell cell)
+        {
+            List<Character> characters = new List<Character>();
+            if (!GM.maze.IsOfThisMaze(cell)) return characters;
+            foreach (Player player in GM.ActivePlayers)
+            {
+                foreach (Character character in player.Tokens)
+                {
+                    if (character.X == cell.X && character.Y == cell.Y) {characters.Add(character); }
+                }
+            }
+            foreach (Player player in GM.NonActivePlayers)
+            {
+                foreach (Character character in player.Tokens)
+                {
+                    if (character.ActualState == State.Active && character.X == cell.X && character.Y == cell.Y) {characters.Add(character); }
+                }
+            }
+            return characters;
+        }    
+
+        public Cell GetTokenInitialPosition(PlayableCharacter token)
+        {
+            Player? player = null;
+            int numberOfPlayer;
+            int numberOfToken;
+            Cell startCell;
+            foreach (Player possiblePlayer in GM.ActivePlayers)
+            {
+                if (possiblePlayer.Tokens.Contains(token)) 
+                {
+                    player = possiblePlayer;
+                    break;
+                }
+            }
+            if (player is null)
+            {
+                foreach (Player possiblePlayer in GM.ActivePlayers)
+                {
+                    if (possiblePlayer.Tokens.Contains(token)) 
+                    {
+                        player = possiblePlayer;
+                        break;
+                    }
+                }
+                if (player is null) return new Cell(0, 0);
+                numberOfPlayer = GM.ActivePlayers.Count + GM.NonActivePlayers.IndexOf(player);
+            }
+            else
+            {
+                numberOfPlayer = GM.ActivePlayers.IndexOf(player);
+            }
+            numberOfToken = player.Tokens.IndexOf(token);
+            startCell = GM.StartPoints[numberOfPlayer*GM.NumberOfTokensByPlayers + numberOfToken];
+            return startCell;
+        }
+
+        public void StabilizeToken(Character token)
+        {
+            if (token.CurrentLife > token.MaxLife) 
+            {
+                token.CurrentLife = token.MaxLife;
+                return;
+            }
+            if (token.CurrentLife <= 0) 
+            {
+                if (token is PlayableCharacter playable) 
+                {
+                    Cell startCell = GM.GetTokenInitialPosition(playable);
+                    if (!GM.maze.IsOfThisMaze(startCell)) return;
+                    token.ChangePosition(startCell.X, startCell.Y);
+                    foreach(NPC nonPlayable in GM.NonActivePlayers[GM.NonActivePlayers.Count - 1].Tokens)
+                    {
+                        if(nonPlayable.TargedCharacters is not null && nonPlayable.TargedCharacters.Contains(token))
+                        {
+                            nonPlayable.TargedCharacters.Remove(token);
+                        }
+                    }
+                    /*foreach(Effect effect in token.ActualEffects)
+                    {
+                        effect.Duration = 0;
+                    }
+                    */
+                }
+                else
+                {
+                    token.ChangeState();
+                    GM.NonActivePlayers[GM.NonActivePlayers.Count - 1].Tokens.Remove(token);
+                }
+            }
         }
 
     }

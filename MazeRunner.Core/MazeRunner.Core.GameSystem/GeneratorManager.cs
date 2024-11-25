@@ -1,4 +1,3 @@
-using System.Reflection.Metadata;
 using MazeRunner.Core.InteractiveObjects;
 using MazeRunner.Core.MazeGenerator;
 
@@ -56,6 +55,7 @@ namespace MazeRunner.Core.GameSystem
                         if (actualCell.Interactive is null && !GM.StartPoints.Contains(actualCell) && !GM.EndPoints.Contains(actualCell)) {emptyCells.Add(actualCell);}
                     }
                 }
+                if (numberOfObstacles + numberOfTraps > emptyCells.Count) return false;
                 foreach (string typeName in Enum.GetNames(typeof(TypeOfInteractive)))
                 {
                     int number;
@@ -76,9 +76,9 @@ namespace MazeRunner.Core.GameSystem
                             break;
                     }
                     Type? enumType = Type.GetType(enumName);
-                    if (enumType is null) {continue; }
+                    if (enumType is null) {return false; }
                     classes = Enum.GetNames(enumType);
-                    if (classes is null) {continue; }
+                    if (classes is null) {return false; }
                     for (int i = 0; i < number; i++)
                     {
                         actualCell = emptyCells[random.Next(0, emptyCells.Count())];
@@ -106,9 +106,10 @@ namespace MazeRunner.Core.GameSystem
                 {
                     actualCell  = GM.maze.Grid[x, y];
                     if (actualCell.Interactive is null && !GM.StartPoints.Contains(actualCell) 
-                    && !GM.EndPoints.Contains(actualCell) && GM.AM.GetCharactersInCell(actualCell).Count < 2) {emptyCells.Add(actualCell);}
+                    && !GM.EndPoints.Contains(actualCell) && GM.GetCharactersInCell(actualCell).Count < 2) {emptyCells.Add(actualCell);}
                 }
             }
+            if (numberOfNPCs > emptyCells.Count) return false;
             for (int i = 0; i < numberOfNPCs; i++)
             {
                 actualCell = emptyCells[random.Next(0, emptyCells.Count())];
@@ -119,7 +120,7 @@ namespace MazeRunner.Core.GameSystem
                     GM.NonActivePlayers[GM.NonActivePlayers.Count - 1].Tokens.Add(NonPlayable);
                     actualCell.Interactive = null;
                 }
-                if (GM.AM.GetCharactersInCell(actualCell).Count > 1) emptyCells.Remove(actualCell);
+                if (GM.GetCharactersInCell(actualCell).Count > 1) emptyCells.Remove(actualCell);
             }
             return true;
         }
@@ -140,7 +141,7 @@ namespace MazeRunner.Core.GameSystem
             {
                 token = playable as PlayableCharacter;
                 if (token is null) return false;
-                Cell startCell = GM.MM.TokenInitialPosition(token);
+                Cell startCell = GM.GetTokenInitialPosition(token);
                 if (!GM.maze.IsOfThisMaze(startCell)) return false;
                 playable.ChangePosition(startCell.X, startCell.Y);
                 GM.ChangeInTurnMade += token.NewTurn;

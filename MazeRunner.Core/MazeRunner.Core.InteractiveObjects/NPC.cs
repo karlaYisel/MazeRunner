@@ -11,18 +11,18 @@ namespace MazeRunner.Core.InteractiveObjects
     { 
         public TypeOfNPC TypeNPC { get; private set; }
         public List<Character>? TargedCharacters { get; private set; }
-        public NPC (int x, int y, TypeOfNPC type, int MaxLife = 50, int Defense = 5, int Streng = 6, int Ability = 5, int Speed = 4)
+        public NPC (int x, int y, TypeOfNPC type, int MaxLife = 50, int Defense = 5, int Strength = 6, int Ability = 5, int Speed = 4)
         {
-            this.ActualState = State.Active;
-            this.X = x;
-            this.Y = y;
-            this.TypeNPC = type;
+            ActualState = State.Active;
+            X = x;
+            Y = y;
+            TypeNPC = type;
             if (type == TypeOfNPC.Neutral) TargedCharacters = new List<Character> ();
             IsTargeted = false;
             this.MaxLife = MaxLife;
-            this.ActualLife = MaxLife;
+            CurrentLife = MaxLife;
             this.Defense = Defense;
-            this.Streng = Streng;
+            this.Strength = Strength;
             this.Ability = Ability;
             this.Speed = Speed;
         }

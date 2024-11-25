@@ -31,11 +31,12 @@ namespace MazeRunner.Core.GameSystem
         }
 
 //Attack's methods
-        public List<Character> GetPossibleOponents(Character actualCharacter)
+        public List<Character> GetPossibleOpponents(Character actualCharacter)
         {
             List<Character> opponents = new List<Character>();
-            List<Character> possibleOponents = new List<Character>();
+            List<Character> possibleOpponents = new List<Character>();
             List<Cell> cells;
+            Cell actualCell;
             Player[] Players = new Player[5];
             int i = 0;
             foreach (Player allPlayer in GM.ActivePlayers)
@@ -63,30 +64,35 @@ namespace MazeRunner.Core.GameSystem
             switch (typeOfAttack)
             {
                 case TypeOfAttack.Short:
-                    possibleOponents.AddRange(GetCharactersInCell(initialCell));
+                    possibleOpponents.AddRange(GM.GetCharactersInCell(initialCell));
                     cells = GM.maze.GetNeighborsWithoutWall(initialCell);
                     foreach (Cell cell in cells)
                     {
-                        possibleOponents.AddRange(GetCharactersInCell(cell));
+                        possibleOpponents.AddRange(GM.GetCharactersInCell(cell));
                     }
                     break;
                 case TypeOfAttack.Large: 
-                    Stack<Cell> path;
-                    cells = GM.MM.GetCellsAtDistance(initialCell, 1);
-                    cells.AddRange(GM.MM.GetCellsAtDistance(initialCell, 2));
+                    Queue<Cell> waitingCells = new Queue<Cell>([..GM.maze.GetNeighborsWithoutWall(initialCell)]);
+                    cells = GM.maze.GetNeighborsWithoutWall(initialCell);
+                    while (waitingCells.Count > 0)
+                    {
+                        actualCell = waitingCells.Dequeue();
+                        foreach (Cell neigbour in GM.maze.GetNeighborsWithoutWall(actualCell))
+                        {
+                            if(!initialCell.Equals(neigbour) && !cells.Contains(neigbour)) cells.Add(neigbour);
+                        }
+                    }
                     foreach (Cell cell in cells)
                     {
-                        path = GM.MM.GetOptimalPath(initialCell, cell, 8);
-                        if (path.Count < 1 || path.Count > 2) continue;
-                        possibleOponents.AddRange(GetCharactersInCell(cell));
+                        possibleOpponents.AddRange(GM.GetCharactersInCell(cell));
                     }
                     break;
                 case TypeOfAttack.Distance:
-                    cells = GM.MM.GetCellsAtDistance(initialCell, 2);
-                    cells.AddRange(GM.MM.GetCellsAtDistance(initialCell, 3));
+                    cells = GetCellsAtDistance(initialCell, 2);
+                    cells.AddRange(GetCellsAtDistance(initialCell, 3));
                     foreach (Cell cell in cells)
                     {
-                        possibleOponents.AddRange(GetCharactersInCell(cell));
+                        possibleOpponents.AddRange(GM.GetCharactersInCell(cell));
                     }
                     break;
                 default:
@@ -101,7 +107,7 @@ namespace MazeRunner.Core.GameSystem
                 }
             }
             if (player is null) return opponents;
-            foreach (Character character in possibleOponents)
+            foreach (Character character in possibleOpponents)
             {
                 if (this.GM.IsCoopGame)
                 {
@@ -134,63 +140,33 @@ namespace MazeRunner.Core.GameSystem
             return opponents;
         }
 
-        public List<Character> GetCharactersInCell(Cell cell)
-        {
-            List<Character> characters = new List<Character>();
-            if (!GM.maze.IsOfThisMaze(cell)) return characters;
-            foreach (Player player in GM.ActivePlayers)
-            {
-                foreach (Character character in player.Tokens)
-                {
-                    if (character.X == cell.X && character.Y == cell.Y) {characters.Add(character); }
-                }
-            }
-            foreach (Player player in GM.NonActivePlayers)
-            {
-                foreach (Character character in player.Tokens)
-                {
-                    if (character.ActualState == State.Active && character.X == cell.X && character.Y == cell.Y) {characters.Add(character); }
-                }
-            }
-            return characters;
-        }    
-
-        public void StabilizeToken(Character token)
-        {
-            if (token.ActualLife > token.MaxLife) 
-            {
-                token.ActualLife = token.MaxLife;
-                return;
-            }
-            if (token.ActualLife <= 0) 
-            {
-                if (token is PlayableCharacter playable) 
-                {
-                    Cell startCell = GM.MM.TokenInitialPosition(playable);
-                    if (!GM.maze.IsOfThisMaze(startCell)) return;
-                    token.ChangePosition(startCell.X, startCell.Y);
-                    foreach(NPC nonPlayable in GM.NonActivePlayers[GM.NonActivePlayers.Count - 1].Tokens)
-                    {
-                        if(nonPlayable.TargedCharacters is not null && nonPlayable.TargedCharacters.Contains(token))
-                        {
-                            nonPlayable.TargedCharacters.Remove(token);
-                        }
-                    }
-                    /*foreach(Effect effect in token.ActualEffects)
-                    {
-                        effect.Duration = 0;
-                    }
-                    */
-                }
-                else
-                {
-                    token.ChangeState();
-                    GM.NonActivePlayers[GM.NonActivePlayers.Count - 1].Tokens.Remove(token);
-                }
-            }
-        }
-
         //public void StabilizeEffects(Character token) {}
+    
+        public List<Cell> GetCellsAtDistance (Cell initialCell, int distance)
+        {
+            List<Cell> cells = new List<Cell>();
+            if (!GM.maze.IsOfThisMaze(initialCell)) return cells;
+            List<(int x, int y)> possibleCells = new List<(int, int)> ();
+            int y;
+            for (int x = 0; x <= distance; x++)
+            {
+                y = distance - x;
+                possibleCells.Add((initialCell.X + x, initialCell.Y + y));
+                if (y > 0) {possibleCells.Add((initialCell.X + x, initialCell.Y - y)); }
+                if (x > 0) {possibleCells.Add((initialCell.X - x, initialCell.Y + y)); }
+                if (x > 0 && y > 0) {possibleCells.Add((initialCell.X - x, initialCell.Y - y)); }
+            }
+            foreach ((int x, int y) possibleCell in possibleCells)
+            {
+                if(possibleCell.x < GM.maze.Width && possibleCell.x >= 0
+                && possibleCell.y < GM.maze.Height && possibleCell.y >= 0)
+                {
+                    cells.Add(GM.maze.Grid[possibleCell.x, possibleCell.y]);
+                }
+            }
+            return cells;
+
+        }
 
         public void TargetCharacters(List<Character> characters)
         {

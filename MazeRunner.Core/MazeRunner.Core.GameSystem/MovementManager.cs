@@ -32,7 +32,7 @@ namespace MazeRunner.Core.GameSystem
         }
 
 //Movement's methods
-        public void RandomMove (Character token)
+        public void MakeRandomMove (Character token)
         {
             List<(Cell cell, int distance)> cells = GetCellsInRange(GM.maze.Grid[token.X, token.Y], token.Speed);
             if (random.Next(0, cells.Count + 1) == 0)
@@ -51,10 +51,12 @@ namespace MazeRunner.Core.GameSystem
             int initialLife;
             //Effects[] initialEffects; //Longitud de Effects.TypeOfEffects enum
             Stack<Cell> optimalPath = GetOptimalPath(GM.maze.Grid[token.X, token.Y], cell, distance);
+            distance = optimalPath.Count;
             Queue<Cell> path = new Queue<Cell>();
             cell = GM.maze.Grid[token.X, token.Y];
             int delay;
-            for (int i = 0; i < optimalPath.Count(); i++)
+            CleanColor();
+            for (int i = 0; i < distance; i++)
             {
                 if (token.ActualState == State.Inactive /*Si contiene tipo congelado no moverte*/) 
                 {
@@ -71,24 +73,24 @@ namespace MazeRunner.Core.GameSystem
                 GM.EventChangeInMazeMade();
                 if (cell.Interactive is Trap trap && (trap.IsStandTrap == false || optimalPath.Count() == 0)) 
                 {
-                    initialLife = token.ActualLife;
+                    initialLife = token.CurrentLife;
                     //initialEffects = ref token.ActualEffects; ???
                     if (trap.TryToTrigger(token))
                     {
-                        GM.AM.StabilizeToken(token);
-                        if ((initialLife != token.MaxLife && token.ActualLife == token.MaxLife) || token.ActualState == State.Inactive) 
+                        GM.StabilizeToken(token);
+                        if ((initialLife != token.MaxLife && token.CurrentLife == token.MaxLife) || token.ActualState == State.Inactive) 
                         {
                             GM.EventDefetedToken(token, trap, 0);
                             CleanColor();
                             return;
                         }
-                        if (initialLife > token.ActualLife)
+                        if (initialLife > token.CurrentLife)
                         {
-                            GM.EventDemagedToken(token, trap, initialLife - token.ActualLife);
+                            GM.EventDemagedToken(token, trap, initialLife - token.CurrentLife);
                         }
-                        else if (initialLife < token.ActualLife)
+                        else if (initialLife < token.CurrentLife)
                         {
-                            GM.EventHealedToken(token, trap, token.ActualLife - initialLife);
+                            GM.EventHealedToken(token, trap, token.CurrentLife - initialLife);
                         }
                         //compara efectos para saber cuales se anaden
                         //StabilizeEffects(tokens); //Los efectos dan mensaje del dano que hacen, cuales se quitan
@@ -99,44 +101,32 @@ namespace MazeRunner.Core.GameSystem
                         GM.EventDemagedToken(token, trap, 0);
                     }
                 }
-            }
-            CleanMovement(path);
-        }
-
-        public Cell TokenInitialPosition(PlayableCharacter token)
-        {
-            Player? player = null;
-            int numberOfPlayer;
-            int numberOfToken;
-            Cell startCell;
-            foreach (Player possiblePlayer in GM.ActivePlayers)
-            {
-                if (possiblePlayer.Tokens.Contains(token)) 
+                if(GM.EndPoints.Contains(cell))
                 {
-                    player = possiblePlayer;
-                    break;
-                }
-            }
-            if (player is null)
-            {
-                foreach (Player possiblePlayer in GM.ActivePlayers)
-                {
-                    if (possiblePlayer.Tokens.Contains(token)) 
+                    if (token is not NPC)
                     {
-                        player = possiblePlayer;
-                        break;
+                        foreach(Player player in GM.ActivePlayers)
+                        {
+                            if(player.Tokens.Contains(token)) 
+                            {
+                                GM.EventPlayerWon(player);
+                                CleanColor();
+                                return;
+                            }
+                        }
+                        foreach(Player player in GM.NonActivePlayers)
+                        {
+                            if(player.Tokens.Contains(token)) 
+                            {
+                                GM.EventPlayerWon(player);
+                                CleanColor();
+                                return;
+                            }
+                        }
                     }
                 }
-                if (player is null) return new Cell(0, 0);
-                numberOfPlayer = GM.ActivePlayers.Count + GM.NonActivePlayers.IndexOf(player);
             }
-            else
-            {
-                numberOfPlayer = GM.ActivePlayers.IndexOf(player);
-            }
-            numberOfToken = player.Tokens.IndexOf(token);
-            startCell = GM.StartPoints[numberOfPlayer*GM.NumberOfTokensByPlayers + numberOfToken];
-            return startCell;
+            CleanMovement(path);
         }
 
         public Stack<Cell> GetOptimalPath(Cell cell, Cell destiny, int distance = 10)
@@ -196,7 +186,7 @@ namespace MazeRunner.Core.GameSystem
             cells.Add((initialCell, 0));
             List<Cell> cellsWithi = new List<Cell>();
             List<Cell> actualCells = new List<Cell>();
-            List<Cell> neighbors = new List<Cell>();
+            List<Cell> neighbors;
             int delay;
             for (int i = 0; i < distance; i++)
             {
@@ -210,7 +200,7 @@ namespace MazeRunner.Core.GameSystem
                     neighbors = GM.maze.GetNeighborsWithoutWall(cell);
                     foreach (Cell neighbor in neighbors)
                     {
-                        if (GM.AM.GetCharactersInCell(neighbor).Count() > 1 || (neighbor.Interactive is Obstacle obs && obs.ActualState == State.Active && obs.Delay == 5))
+                        if (GM.GetCharactersInCell(neighbor).Count() > 1 || (neighbor.Interactive is Obstacle obs && obs.ActualState == State.Active && obs.Delay == 5))
                         {
                             continue;
                         }
@@ -222,12 +212,24 @@ namespace MazeRunner.Core.GameSystem
                         {
                             delay = 1;
                         }
-                        foreach ((Cell cell, int distance) cellWithDistance in cells)
+                        if (actualCells.Contains(neighbor))
                         {
-                            if (cellWithDistance.cell.Equals(neighbor) && i + delay <= distance && cellWithDistance.distance > i + delay)
+                            foreach ((Cell cell, int distance) cellWithDistance in cells)
+                            {
+                                if (cellWithDistance.cell.Equals(neighbor) && cellWithDistance.distance > i + delay)
+                                {
+                                    cells.Add((neighbor, i + delay));
+                                    cells.Remove(cellWithDistance);
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if(distance >= i + delay)
                             {
                                 cells.Add((neighbor, i + delay));
-                                cells.Remove(cellWithDistance);
+                                actualCells.Add(neighbor);
                             }
                         }
                     }
@@ -236,32 +238,6 @@ namespace MazeRunner.Core.GameSystem
             } 
             cells.Remove((initialCell, 0));
             return cells;
-        }
-    
-        public List<Cell> GetCellsAtDistance (Cell initialCell, int distance)
-        {
-            List<Cell> cells = new List<Cell>();
-            if (!GM.maze.IsOfThisMaze(initialCell)) return cells;
-            List<(int x, int y)> possibleCells = new List<(int, int)> ();
-            int y;
-            for (int x = 0; x <= distance; x++)
-            {
-                y = distance - x;
-                possibleCells.Add((initialCell.X + x, initialCell.Y + y));
-                if (y > 0) {possibleCells.Add((initialCell.X + x, initialCell.Y - y)); }
-                if (x > 0) {possibleCells.Add((initialCell.X - x, initialCell.Y + y)); }
-                if (x > 0 && y > 0) {possibleCells.Add((initialCell.X - x, initialCell.Y - y)); }
-            }
-            foreach ((int x, int y) possibleCell in possibleCells)
-            {
-                if(possibleCell.x < GM.maze.Width && possibleCell.x >= 0
-                && possibleCell.y < GM.maze.Height && possibleCell.y >= 0)
-                {
-                    cells.Add(GM.maze.Grid[possibleCell.x, possibleCell.y]);
-                }
-            }
-            return cells;
-
         }
 
         public void ColorCells(List<Cell> cells)

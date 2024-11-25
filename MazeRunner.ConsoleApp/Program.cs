@@ -1,17 +1,24 @@
 ﻿using MazeRunner.Core.MazeGenerator;
 using MazeRunner.Core.InteractiveObjects;
 using MazeRunner.Core.GameSystem;
+using System.Security.Cryptography.X509Certificates;
+using System.Runtime.InteropServices;
 
 namespace MazeRunner.ConsoleApp
 {
     public class Program
     {
         static GameManager GM = GameManager.GM;
+        static GeneratorManager GeM = GeneratorManager.GeM;
+        static MovementManager MM = MovementManager.MM;
+        static AttackManager AM = AttackManager.AM;
+        static NonActiveTurnManager NATM = NonActiveTurnManager.NATM;
         public static void Main(string[] args)
         {
             GM.DefetedToken += DefetedMessage;
             GM.HealedToken += HealedMessage;
             GM.DemagedToken += DemagedMessage;
+            GM.PlayerWon += PlayerVictory;
             GM.ChangeInMazeMade += RefreshMaze;
             PrincipalMenu();
         }
@@ -24,7 +31,7 @@ namespace MazeRunner.ConsoleApp
                 Console.Clear();
                 Console.WriteLine();
                 Console.WriteLine("MAZE RUNNER");
-                Console.WriteLine("--------------");
+                Console.WriteLine("-----------");
                 Console.WriteLine("1 - Jugar");
                 Console.WriteLine("2 - Salir");
                 Console.WriteLine();
@@ -98,8 +105,10 @@ namespace MazeRunner.ConsoleApp
                         GM.InitializePlayers(number, names);
                         //
                         Maze maze = new Maze(11, 11);
+                        GeM.TryGenerateInteractiveObjects(GM.InitialNumberOfObstacles, GM.InitialNumberOfTraps);
+                        GeM.TryGenerateNPCs(GM.InitialNumberOfNPCs);
                         List<Cell> startPoints = new List<Cell>([maze.Grid[10, 9], maze.Grid[0, 0], maze.Grid[9, 10]
-                                                               , maze.Grid[0, 1], maze.Grid[10, 9], maze.Grid[1, 0]]);
+                                                               , maze.Grid[0, 1], maze.Grid[10, 10], maze.Grid[1, 0]]);
                         List<Cell> endPoints = new List<Cell>([maze.Grid[5, 5]]);
                         LoadGame(false, false, maze, startPoints, endPoints, 10, 10, 10, 3);
                         return;
@@ -134,7 +143,7 @@ namespace MazeRunner.ConsoleApp
                     Console.WriteLine("------------------------------------------");
                     Console.WriteLine("1 - Héroe");
                     Console.WriteLine();
-                    Console.Write("> Mi ficha número {0} será ", player.Tokens.Count + 1);
+                    Console.Write("> Mi ficha número {0} será ", charactersTypes.Count + 1);
     
                     option = Console.ReadLine();
     
@@ -158,7 +167,7 @@ namespace MazeRunner.ConsoleApp
                         }
                     }
                 }
-                GM.GeM.TryGenerateTokensForPlayer(player, charactersTypes);
+                GeM.TryGenerateTokensForPlayer(player, charactersTypes);
             }
             StartGame();
         }
@@ -188,7 +197,7 @@ namespace MazeRunner.ConsoleApp
                         {
                             foreach (NPC nonPlayable in GM.NonActivePlayers[4 - GM.ActivePlayers.Count].Tokens)
                             {
-                                GM.NATM.TakeTurn(nonPlayable);
+                                NATM.PerformTurn(nonPlayable);
                             }
                         }
                         else if (GM.IsCoopGame)
@@ -430,13 +439,13 @@ namespace MazeRunner.ConsoleApp
 
         private static void MoveInTurn(PlayableCharacter character)
         {
-            List<(Cell cell, int distance)> cellsWithDistance = GM.MM.GetCellsInRange(GM.maze.Grid[character.X, character.Y], character.Speed);
+            List<(Cell cell, int distance)> cellsWithDistance = MM.GetCellsInRange(GM.maze.Grid[character.X, character.Y], character.Speed);
             List<Cell> cells = new List<Cell>();
             foreach ((Cell cell, int distance) cell in cellsWithDistance)
             {
                 cells.Add(cell.cell);
             }
-            GM.MM.ColorCells(cells);
+            MM.ColorCells(cells);
             string? option;
             int[,] matriz;
             Cell destinyCell;
@@ -468,7 +477,7 @@ namespace MazeRunner.ConsoleApp
                     switch (number)
                     {
                         case 0:
-                            GM.MM.CleanColor();
+                            MM.CleanColor();
                             return;
                         case 1:
                             Console.Write("Posición X: ");
@@ -510,9 +519,9 @@ namespace MazeRunner.ConsoleApp
                                     Thread.Sleep(500);
                                     continue;
                                 }
-                                GM.MM.MoveToken(character, destinyCell, destinyDistance);
+                                MM.MoveToken(character, destinyCell, destinyDistance);
                                 character.Moved();
-                                GM.MM.CleanColor();
+                                MM.CleanColor();
                                 return;
                             }
                         default:
@@ -524,12 +533,12 @@ namespace MazeRunner.ConsoleApp
 
         private static void AttackInTurn(PlayableCharacter character)
         {
-            List<Character> oponents = GM.AM.GetPossibleOponents(character);
-            GM.AM.TargetCharacters(oponents);
+            List<Character> opponents = AM.GetPossibleOpponents(character);
+            AM.TargetCharacters(opponents);
             string? option;
             int[,] matriz;
-            Character oponent;
-            int oponentInitialLife;
+            Character opponent;
+            int opponentInitialLife;
             while (true)
             {
                 Console.Clear();
@@ -538,9 +547,9 @@ namespace MazeRunner.ConsoleApp
                 PrintMaze(matriz);
                 Console.WriteLine("");
                 Console.WriteLine("Opciones:");
-                for(int i = 0; i < oponents.Count; i++)
+                for(int i = 0; i < opponents.Count; i++)
                 {
-                    Console.WriteLine("{0} - {1} en {2},{3}", i + 1, oponents[i].GetType().Name, oponents[i].X, oponents[i].Y);
+                    Console.WriteLine("{0} - {1} en {2},{3}", i + 1, opponents[i].GetType().Name, opponents[i].X, opponents[i].Y);
                 }
                 Console.WriteLine("0 - Regresar");
                 Console.WriteLine("");
@@ -558,10 +567,10 @@ namespace MazeRunner.ConsoleApp
                     switch (number)
                     {
                         case 0:
-                            GM.AM.CleanTargets();
+                            AM.CleanTargets();
                             return;
                         default:
-                            if(number > oponents.Count)
+                            if(number > opponents.Count)
                             {
                                 Console.WriteLine("Opción no encontrada.");
                                 Thread.Sleep(500);
@@ -569,26 +578,26 @@ namespace MazeRunner.ConsoleApp
                             }
                             else
                             {
-                                oponent = oponents[number - 1];
-                                oponentInitialLife = oponent.ActualLife;
-                                Console.Write("{0} decide atacar a {1}", character.GetType().Name, oponent.GetType().Name);
+                                opponent = opponents[number - 1];
+                                opponentInitialLife = opponent.CurrentLife;
+                                Console.Write("{0} decide atacar a {1}", character.GetType().Name, opponent.GetType().Name);
                                 Thread.Sleep(100);
-                                if(character.Attack(oponent))
+                                if(character.Attack(opponent))
                                 {
                                     Console.WriteLine(" y es efectivo.");
                                     Thread.Sleep(100);
-                                    GM.AM.StabilizeToken(oponent);
-                                    if ((oponentInitialLife != oponent.MaxLife && oponent.ActualLife == oponent.MaxLife) || oponent.ActualState == State.Inactive) 
+                                    GM.StabilizeToken(opponent);
+                                    if ((opponentInitialLife != opponent.MaxLife && opponent.CurrentLife == opponent.MaxLife) || opponent.ActualState == State.Inactive) 
                                     {
-                                        GM.EventDefetedToken(oponent, character, 0);
+                                        GM.EventDefetedToken(opponent, character, 0);
                                     }
-                                    if (oponentInitialLife > oponent.ActualLife)
+                                    if (opponentInitialLife > opponent.CurrentLife)
                                     {
-                                        GM.EventDemagedToken(oponent, character, oponentInitialLife - oponent.ActualLife);
+                                        GM.EventDemagedToken(opponent, character, opponentInitialLife - opponent.CurrentLife);
                                     }
-                                    else if (oponentInitialLife < oponent.ActualLife)
+                                    else if (opponentInitialLife < opponent.CurrentLife)
                                     {
-                                        GM.EventHealedToken(oponent, character, oponent.ActualLife - oponentInitialLife);
+                                        GM.EventHealedToken(opponent, character, opponent.CurrentLife - opponentInitialLife);
                                     }
                                     GM.EventChangeInMazeMade();
                                 }
@@ -597,7 +606,7 @@ namespace MazeRunner.ConsoleApp
                                     Console.WriteLine(" pero falla.");
                                     Thread.Sleep(100);
                                 }
-                                GM.AM.CleanTargets();
+                                AM.CleanTargets();
                                 character.Attacked();
                                 return;
                             }
@@ -611,12 +620,12 @@ namespace MazeRunner.ConsoleApp
             switch(character.GetType().Name)
             {
                 case "Hero":
-                    List<Character> oponents = GM.AM.GetPossibleOponents(character);
-                    GM.AM.TargetCharacters(oponents);
+                    List<Character> opponents = AM.GetPossibleOpponents(character);
+                    AM.TargetCharacters(opponents);
                     string? option;
                     int[,] matriz;
-                    Character oponent;
-                    int oponentInitialLife;
+                    Character opponent;
+                    int opponentInitialLife;
                     while (true)
                     {
                         Console.Clear();
@@ -625,9 +634,9 @@ namespace MazeRunner.ConsoleApp
                         PrintMaze(matriz);
                         Console.WriteLine("");
                         Console.WriteLine("Opciones:");
-                        for(int i = 0; i < oponents.Count; i++)
+                        for(int i = 0; i < opponents.Count; i++)
                         {
-                            Console.WriteLine("{0} - {1} en {2},{3}", i + 1, oponents[i].GetType().Name, oponents[i].X, oponents[i].Y);
+                            Console.WriteLine("{0} - {1} en {2},{3}", i + 1, opponents[i].GetType().Name, opponents[i].X, opponents[i].Y);
                         }
                         Console.WriteLine("0 - Regresar");
                         Console.WriteLine("");
@@ -645,10 +654,10 @@ namespace MazeRunner.ConsoleApp
                             switch (number)
                             {
                                 case 0:
-                                    GM.AM.CleanTargets();
+                                    AM.CleanTargets();
                                     return;
                                 default:
-                                    if(number > oponents.Count)
+                                    if(number > opponents.Count)
                                     {
                                         Console.WriteLine("Opción no encontrada.");
                                         Thread.Sleep(500);
@@ -656,26 +665,26 @@ namespace MazeRunner.ConsoleApp
                                     }
                                     else
                                     {
-                                        oponent = oponents[number - 1];
-                                        oponentInitialLife = oponent.ActualLife;
-                                        Console.WriteLine("{0} decide usar habilidad ''Espada Sagrada'' en {1}.", character.GetType().Name, oponent.GetType().Name);
+                                        opponent = opponents[number - 1];
+                                        opponentInitialLife = opponent.CurrentLife;
+                                        Console.WriteLine("{0} decide usar habilidad ''Espada Sagrada'' en {1}.", character.GetType().Name, opponent.GetType().Name);
                                         Thread.Sleep(100);
-                                        if(character.ActivateAbility(GM.Turn, oponent))
+                                        if(character.ActivateAbility(GM.Turn, opponent))
                                         {
                                             Console.WriteLine(" y es efectivo.");
                                             Thread.Sleep(100);
-                                            GM.AM.StabilizeToken(oponent);
-                                            if ((oponentInitialLife != oponent.MaxLife && oponent.ActualLife == oponent.MaxLife) || oponent.ActualState == State.Inactive) 
+                                            GM.StabilizeToken(opponent);
+                                            if ((opponentInitialLife != opponent.MaxLife && opponent.CurrentLife == opponent.MaxLife) || opponent.ActualState == State.Inactive) 
                                             {
-                                                GM.EventDefetedToken(oponent, character, 0);
+                                                GM.EventDefetedToken(opponent, character, 0);
                                             }
-                                            if (oponentInitialLife > oponent.ActualLife)
+                                            if (opponentInitialLife > opponent.CurrentLife)
                                             {
-                                                GM.EventDemagedToken(oponent, character, oponentInitialLife - oponent.ActualLife);
+                                                GM.EventDemagedToken(opponent, character, opponentInitialLife - opponent.CurrentLife);
                                             }
-                                            else if (oponentInitialLife < oponent.ActualLife)
+                                            else if (opponentInitialLife < opponent.CurrentLife)
                                             {
-                                                GM.EventHealedToken(oponent, character, oponent.ActualLife - oponentInitialLife);
+                                                GM.EventHealedToken(opponent, character, opponent.CurrentLife - opponentInitialLife);
                                             }
                                             GM.EventChangeInMazeMade();
                                         }
@@ -684,7 +693,7 @@ namespace MazeRunner.ConsoleApp
                                             Console.WriteLine(" pero falla.");
                                             Thread.Sleep(100);
                                         }
-                                        GM.AM.CleanTargets();
+                                        AM.CleanTargets();
                                         return;
                                     }
                             }
@@ -752,6 +761,33 @@ namespace MazeRunner.ConsoleApp
             PrintMaze(matriz);
         }
 
+        public static void PlayerVictory(Player player)
+        {
+            int numberOfPlayer = 5;
+            if (GM.ActivePlayers.Contains(player)) numberOfPlayer = GM.ActivePlayers.IndexOf(player);
+            else if (GM.NonActivePlayers.Contains(player)) numberOfPlayer = GM.NonActivePlayers.IndexOf(player) + GM.ActivePlayers.Count;
+            if (numberOfPlayer < 5)
+            {
+                if (GM.IsCoopGame)
+                {
+                    numberOfPlayer %= 2;
+                    if (GM.ActivePlayers.Count > numberOfPlayer + 2) player = GM.ActivePlayers[numberOfPlayer + 2];
+                    else player = GM.NonActivePlayers[numberOfPlayer + 2 - GM.ActivePlayers.Count];
+                    Console.Clear();
+                    Console.WriteLine("{0} y {1} han ganado el juego!!!", GM.ActivePlayers[numberOfPlayer].Name, player.Name);
+                    Thread.Sleep(1000);
+                    PrincipalMenu();
+                }
+                else
+                {
+                    Console.Clear();
+                    Console.WriteLine("{0} ha ganado el juego!!!", player.Name);
+                    Thread.Sleep(1000);
+                    PrincipalMenu();
+                }
+            }
+        }
+
         public static int[,] GenerateAssosiatedMatriz()
         {
             int[,] matriz = new int[2*GM.maze.Width + 1, 2*GM.maze.Height + 1];
@@ -792,19 +828,22 @@ namespace MazeRunner.ConsoleApp
         {
             Console.Write("    ");
             int numberOfPlayer;
+            string text;
             List<Character> characters;
             for (int x = 0; x < matriz.GetLength(0); x++)
             {
-                if (x < 10) Console.Write(" " + x.ToString() + " ");
-                else if (x < 100) Console.Write(" " + x.ToString());
-                else Console.Write(x.ToString());
+                if (x % 2 == 0) text = "   ";
+                else text = ((x - 1)/2).ToString();
+                while(text.Length < 3) text += " ";
+                Console.Write(text);
             }
             Console.WriteLine("");
             for (int y = 0; y < matriz.GetLength(1); y++)
             {
-                if (y < 10) Console.Write(y.ToString() + "   ");
-                else if (y < 100) Console.Write(y.ToString() + "  ");
-                else Console.Write(y.ToString() + " ");
+                if (y % 2 == 0) text = "   ";
+                else text = ((y - 1)/2).ToString();
+                while(text.Length < 3) text += " ";
+                Console.Write(text);
     
                 for (int x = 0; x < matriz.GetLength(0); x++)
                 {
@@ -825,7 +864,7 @@ namespace MazeRunner.ConsoleApp
                     }
                     else
                     {
-                        characters = GM.AM.GetCharactersInCell(GM.maze.Grid[x/2, y/2]);
+                        characters = GM.GetCharactersInCell(GM.maze.Grid[x/2, y/2]);
                         if (1 > characters.Count) numberOfPlayer = 0;
                         else 
                         {
@@ -943,3 +982,4 @@ namespace MazeRunner.ConsoleApp
         }
     }
 }
+//Arreglar movimiento
