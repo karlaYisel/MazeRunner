@@ -105,12 +105,11 @@ namespace MazeRunner.ConsoleApp
                         GM.InitializePlayers(number, names);
                         //
                         Maze maze = new Maze(11, 11);
-                        GeM.TryGenerateInteractiveObjects(GM.InitialNumberOfObstacles, GM.InitialNumberOfTraps);
-                        GeM.TryGenerateNPCs(GM.InitialNumberOfNPCs);
                         List<Cell> startPoints = new List<Cell>([maze.Grid[10, 9], maze.Grid[0, 0], maze.Grid[9, 10]
                                                                , maze.Grid[0, 1], maze.Grid[10, 10], maze.Grid[1, 0]]);
                         List<Cell> endPoints = new List<Cell>([maze.Grid[5, 5]]);
                         LoadGame(false, false, maze, startPoints, endPoints, 10, 10, 10, 3);
+                        GeM.TryGenerateInteractiveObjects(GM.InitialNumberOfObstacles, GM.InitialNumberOfTraps);
                         return;
                     }
                 }
@@ -125,6 +124,8 @@ namespace MazeRunner.ConsoleApp
         private static void LoadGame(bool isCoopGame, bool playWithBots, Maze maze, List<Cell> startPoints, List<Cell> endPoints, int numberOfObstacles, int numberOfTraps, int numberOfNPCs, int numberOfTokens)
         {
             GM.InitializeLevel(isCoopGame, playWithBots, maze, startPoints, endPoints, numberOfObstacles, numberOfTraps, numberOfNPCs, numberOfTokens);
+            GM.NonActivePlayers[GM.NonActivePlayers.Count - 1].ClearTokens();
+            GeM.TryGenerateNPCs(GM.InitialNumberOfNPCs);
             TokenSelectionMenu();
         }
 
@@ -894,6 +895,7 @@ namespace MazeRunner.ConsoleApp
                                 Console.ForegroundColor = ConsoleColor.Gray;
                                 break;
                             case 5: 
+                                Console.ForegroundColor = ConsoleColor.Gray;
                                 Console.Write("•");
                                 break;
                             case 6:
@@ -975,7 +977,7 @@ namespace MazeRunner.ConsoleApp
                 }
                 foreach(Player player in GM.NonActivePlayers)
                 {
-                    if (player.Tokens.Contains(character)) return GM.ActivePlayers.IndexOf(player) + GM.ActivePlayers.Count + 1;
+                    if (player.Tokens.Contains(character)) return GM.NonActivePlayers.IndexOf(player) + GM.ActivePlayers.Count + 1;
                 }
             }
             return 0;

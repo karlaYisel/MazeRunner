@@ -96,9 +96,7 @@ namespace MazeRunner.Core.GameSystem
 
         public bool TryGenerateNPCs(int numberOfNPCs)
         {
-            int NumberInteractive = GM.ActualNumberOfInteractives + 2*GM.NumberOfPlayableTokens + 2*GM.NumberOfNonPlayableTokens;
-            if (NumberInteractive + numberOfNPCs + GM.EndPoints.Count > GM.maze.Width*GM.maze.Height) return false;
-            List<Cell> emptyCells = [];
+            List<Cell> emptyCells = new List<Cell>();
             Cell actualCell;
             for (int x = 0; x < GM.maze.Width; x++)
             {
