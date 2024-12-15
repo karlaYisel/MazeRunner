@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeRunner.Core", "MazeRunn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeRunner.ConsoleApp", "MazeRunner.ConsoleApp\MazeRunner.ConsoleApp.csproj", "{4EB5A1A8-9B56-410C-8F46-7BCB572F43E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeRunner.WebApp", "MazeRunner.WebApp\MazeRunner.WebApp.csproj", "{18967CC8-E61D-4881-9DA5-E9D0E021026F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,12 @@ Global
 		{4EB5A1A8-9B56-410C-8F46-7BCB572F43E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4EB5A1A8-9B56-410C-8F46-7BCB572F43E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4EB5A1A8-9B56-410C-8F46-7BCB572F43E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18967CC8-E61D-4881-9DA5-E9D0E021026F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18967CC8-E61D-4881-9DA5-E9D0E021026F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18967CC8-E61D-4881-9DA5-E9D0E021026F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18967CC8-E61D-4881-9DA5-E9D0E021026F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{18967CC8-E61D-4881-9DA5-E9D0E021026F} = {4C9C2082-EC67-4111-B322-F12EDA8CA657}
 	EndGlobalSection
 EndGlobal

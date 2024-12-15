@@ -1,0 +1,60 @@
+.message-box {
+    position: fixed; /*fijarlo en toda la ventana y que sea fija en la ventana no en el padre*/
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; 
+}
+
+.container {
+    background-color: white; /*imagen*/ /*limitar el tama;o y que se adapte a el ancho del navegador*/
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.message {
+    margin: 10px 0;
+    text-align: center;
+}
+
+h1.message {
+    color: rgb(34, 43, 47);
+}
+
+/*ajustar texto entre para que no supere su max ni su min y que si no cabe en las 10 col baje*/
+
+h2.message {
+    color: rgb(0, 0, 0);
+}
+
+/*ajustar tama;o que sea fijo siempre o tal vez en la cosa que lo llame para poder ponerlo en un lugarcito tmb*/
+
+.btn-message {
+    background-image: url('/img/menuBackground.png'); /*mejorar imagenes de todo background (menu y fondo) e icono*/
+    background-size: 100% 100%;
+    background-repeat: no-repeat; 
+    background-position: center;
+    border: none;
+    border-radius: 5px;
+    color: rgb(255, 255, 255);
+    justify-content: center;
+    text-align: center;
+    text-decoration: none;
+    margin: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-message:hover {
+    background-color: #0056b3;
+}
+
+
+/*espaciar botones en dependencia del width*/

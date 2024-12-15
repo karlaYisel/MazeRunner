@@ -1,0 +1,46 @@
+﻿@inject IJSRuntime JS
+
+@page "/"
+
+<PageTitle>MazeRunner</PageTitle>
+
+<div class="center-content">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-5 col-lg-6 col-md-8 col-sm-10 col-10">
+                <img src="img/MazeRunner.png" alt="Maze Runner" class="img-fluid">
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-xl-5 col-lg-6 col-md-8 col-sm-8 col-8 container border-3 menu"> 
+                <div class="row justify-content-center">
+                    <h1>Menú Principal</h1>
+                </div>
+                <div class="row justify-content-center">
+                    <a class="btn btn-menu" href="/PlayerConfiguration">Jugar</a>
+                </div>
+                <div class="row justify-content-center">
+                    <button class="btn btn-menu" @onclick="() => confirmationMessageIsActive=true">Salir</button> 
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if(confirmationMessageIsActive)
+{
+<MessageBox title="¿Salir?" message="¿Seguro de que deseas salir?<br />Te redigiremos a la página de Google." isWithTwoButtons="true" OnConfirm="Exit"/>
+}
+
+@code { /*mudar todos los code*/ /*estilizar menu*/
+    private bool confirmationMessageIsActive = false;
+
+    private async Task Exit(bool confirm)
+    {
+        if (confirm)
+        {
+            await JS.InvokeVoidAsync("eval", "window.location.replace('https://www.google.com');");
+        }
+        confirmationMessageIsActive = false;
+    }
+} 
