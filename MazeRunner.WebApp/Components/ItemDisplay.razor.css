@@ -1,0 +1,22 @@
+.item-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(249, 249, 249, 0.537); 
+    border: 1px solid rgb(204, 204, 204); 
+    border-radius: 8px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    margin: 10px;
+    padding: 15px;
+    transition: transform 0.2s; 
+}
+
+.item-box:hover {
+    transform: scale(1.05); 
+}
+
+.item-image {
+    width: 80%; 
+    height: auto;  
+    object-fit: cover; 
+}

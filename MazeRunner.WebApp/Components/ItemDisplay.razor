@@ -1,0 +1,14 @@
+<div class="item-box">
+    <img src=@path alt="image.png" class="img-fluid item-image" @onclick="_OnClick">
+</div>
+
+@code {
+    [Parameter] public string path { get; set; } = ""; /*o poner un enum y que sea en dependencia del tipo que entre para que sea mas seguro*/
+    [Parameter] public EventCallback<int> OnClick { get; set; }
+    [Parameter] public int number { get; set; } = 0;
+
+    private async Task _OnClick()
+    {
+        await OnClick.InvokeAsync(number);
+    }
+}

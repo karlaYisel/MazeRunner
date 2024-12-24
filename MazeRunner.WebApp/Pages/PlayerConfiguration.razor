@@ -2,3 +2,75 @@
 
 <PageTitle>MazeRunner</PageTitle>
 
+<div class="center-content">
+    <div class="container menu">
+        <div class = "row justify-content-center">
+            <h1>¿Cuantos jugadores son?</h1>
+        </div>
+        <div class = "row justify-content-center">
+        @foreach (var (name, index) in names.Select((value, idx) => (value, idx)))
+        {
+            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
+                <ItemDisplay path="@(numberOfPlayers > index ? $"img/{index + 1}.png": $"img/{index + 1}n.png")" OnClick="(number) => ChangeNumberOfPlayers(number)" number="@(index + 1)" />
+                <input type="text" @bind="names[index]" placeholder="@(numberOfPlayers > index ? $"Jugador {index + 1}": $"Bot {index + 1 - numberOfPlayers}")" />
+            </div> 
+        }
+        </div>
+        <div class = "row justify-content-center">
+            <button class="btn btn-menu" @onclick="TryStart">Continuar</button>
+        </div>
+    </div>
+</div>
+
+@if(warningMessageIsActive)
+{
+<MessageBox title="Opción Inválida" message="Hasta ahora solo se permiten de 2 a 4 jugadores." btnMessageConfirm="De Acuerdo" isWithTwoButtons="false" OnConfirm="Confirm"/>
+}
+
+@code { /*arreglar la imagen poner estilo al texto y textbox y arreglar disposicion*/
+    static GameManager GM = GameManager.GM;
+    static GeneratorManager GeM = GeneratorManager.GeM;
+    private bool warningMessageIsActive = false;
+    private int numberOfPlayers = 2;
+    private string[] names = new string[4];
+
+    private void Confirm(bool isConfirmed)
+    {
+        if (isConfirmed)
+        {
+            warningMessageIsActive = false;
+        }
+    }
+
+    private void ChangeNumberOfPlayers(int number)
+    {
+        if(number > 1 && number < 5)
+        {
+            numberOfPlayers = number;
+        }
+        else warningMessageIsActive = true;
+    }
+
+    private void TryStart()
+    {
+        GM.InitializePlayers(numberOfPlayers, names);
+        /*todo esto mas adelante hacer una pagina para que sea configurable*/
+        Maze maze = new Maze(11, 11);
+        bool isCoopGame = false;
+        bool playWithBots = false;
+        int numberOfObstacles = 10;
+        int numberOfTraps = 10;
+        int numberOfNPCs = 10;
+        int numberOfTokens = 3;
+        List<Cell> startPoints = new List<Cell>([maze.Grid[1, 10], maze.Grid[0, 0], maze.Grid[10, 1]
+                                               , maze.Grid[9, 0], maze.Grid[10, 10], maze.Grid[0, 9]
+                                               , maze.Grid[0, 1], maze.Grid[10, 0], maze.Grid[9, 10]
+                                               , maze.Grid[10, 9], maze.Grid[0, 10], maze.Grid[1, 0]]);
+        List<Cell> endPoints = new List<Cell>([maze.Grid[5, 5]]);
+        GM.InitializeLevel(isCoopGame, playWithBots, maze, startPoints, endPoints, numberOfObstacles, numberOfTraps, numberOfNPCs, numberOfTokens);
+        GM.NonActivePlayers[GM.NonActivePlayers.Count - 1].ClearTokens();
+        GeM.TryGenerateNPCs(GM.InitialNumberOfNPCs);
+        GeM.TryGenerateInteractiveObjects(GM.InitialNumberOfObstacles, GM.InitialNumberOfTraps);
+        /*TokenSelectionMenu();*/         
+    }
+}

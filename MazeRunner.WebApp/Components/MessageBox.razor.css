@@ -12,10 +12,12 @@
 }
 
 .container {
-    background-color: white; /*imagen*/ /*limitar el tama;o y que se adapte a el ancho del navegador*/
+    background-color: white; /*imagen*/
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 90%;
+    width: 500px;
 }
 
 .message {
@@ -25,15 +27,25 @@
 
 h1.message {
     color: rgb(34, 43, 47);
+    font-size: calc(2rem + 1vw); 
+    max-width: 90%; 
+    text-align: center;
+    margin: 10px auto;
 }
-
-/*ajustar texto entre para que no supere su max ni su min y que si no cabe en las 10 col baje*/
 
 h2.message {
     color: rgb(0, 0, 0);
+    font-size: calc(1.5rem + 1vw); 
+    max-width: 90%; 
+    text-align: center;
+    margin: 10px auto;
 }
 
-/*ajustar tama;o que sea fijo siempre o tal vez en la cosa que lo llame para poder ponerlo en un lugarcito tmb*/
+.button-row {
+    display: flex;
+    justify-content: space-between; 
+    margin-top: 20px; 
+}
 
 .btn-message {
     background-image: url('/img/menuBackground.png'); /*mejorar imagenes de todo background (menu y fondo) e icono*/
@@ -42,19 +54,17 @@ h2.message {
     background-position: center;
     border: none;
     border-radius: 5px;
-    color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
     justify-content: center;
     text-align: center;
     text-decoration: none;
-    margin: 10px;
+    margin: 0 5px;
     padding: 10px 20px;
     cursor: pointer;
     transition: background-color 0.3s;
+    flex: 1;
 }
 
 .btn-message:hover {
     background-color: #0056b3;
 }
-
-
-/*espaciar botones en dependencia del width*/
