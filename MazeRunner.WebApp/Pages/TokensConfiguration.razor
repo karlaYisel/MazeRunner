@@ -1,0 +1,104 @@
+@inject NavigationManager NavMg
+
+@page "/TokensConfiguration"
+
+<PageTitle>MazeRunner</PageTitle>
+
+<div class="center-content">
+    <div class="container menu">
+        <div class = "row justify-content-center">
+            <h1>Lista de Tokens:</h1>
+        </div>
+        <div class = "row justify-content-center">
+        @foreach (var (characterType, index) in Enum.GetValues(typeof(TypeOfPlayableCharacter)).Cast<TypeOfPlayableCharacter>().Select((value, idx) => (value, idx)))
+        {
+            <div class="col-xl-2 col-lg-2 col-md-4 col-sm-4 col-8">
+                <div>
+                    <ItemDisplay path="@($"img/tokens/{characterType}.png")" OnClick="(number) => AddToken(number)" number="@(index)" />
+                </div>
+                <p>@characterType</p>
+            </div> 
+        }
+        </div>
+        <div class = "row justify-content-center">
+            <h1>Tokens de @(GM.ActivePlayers[playerNumber].Name)</h1>
+        </div>
+        <div class = "row justify-content-center">
+        @foreach (var (characterType, index) in charactersTypes.Select((value, idx) => (value, idx)))
+        {
+            <div class="col-xl-2 col-lg-2 col-md-4 col-sm-4 col-8">
+                <ItemDisplay path="@($"img/tokens/{characterType}.png")" OnClick="(number) => EraseToken(number)" number="@(index)" />
+            </div> 
+        }
+        </div>
+        <div class = "row justify-content-center">
+            <button class="btn btn-menu" @onclick="Continue">Continuar</button>
+        </div>
+    </div>
+</div>
+
+@if(warningMessageIsActive)
+{
+<MessageBox title="Opción Inválida" message="@message" btnMessageConfirm="De Acuerdo" isWithTwoButtons="false" OnConfirm="Confirm"/>
+}
+
+@code{
+    static GameManager GM = GameManager.GM;
+    static GeneratorManager GeM = GeneratorManager.GeM;
+    private string message = "";
+    private bool warningMessageIsActive = false;
+    private int playerNumber = 0;
+    private List<TypeOfPlayableCharacter> charactersTypes = new List<TypeOfPlayableCharacter>();
+
+    private void Confirm(bool isConfirmed)
+    {
+        if (isConfirmed)
+        {
+            warningMessageIsActive = false;
+        }
+    }
+
+    private void AddToken(int number)
+    {
+        if(charactersTypes.Count < GM.NumberOfTokensByPlayers && Enum.GetValues(typeof(TypeOfPlayableCharacter)).Length > number && number >= 0)
+        {
+            charactersTypes.Add((TypeOfPlayableCharacter)number);
+        }
+        else
+        {
+            message = "Usted ya tiene el máximo posible de tokens o intenta acceder a un valor no existente.";
+            warningMessageIsActive = true;
+        }
+    }
+
+    private void EraseToken(int number)
+    {
+        if (charactersTypes.Count > 0 && number >= 0 && number < charactersTypes.Count)
+        {
+            charactersTypes.RemoveAt(number);
+        }
+    }
+
+    private void Continue()
+    {
+        if(charactersTypes.Count == GM.NumberOfTokensByPlayers)
+        {
+            GeM.TryGenerateTokensForPlayer(GM.ActivePlayers[playerNumber], charactersTypes);
+            charactersTypes.Clear();
+            if(playerNumber + 1 == GM.ActivePlayers.Count)
+            {
+                NavMg.NavigateTo("/GameDisplay"); 
+            }
+            else
+            {
+                playerNumber++;
+            }
+        }
+        else 
+        {
+            message = $"Necesitas tener {GM.NumberOfTokensByPlayers} tokens para continuar.";
+            warningMessageIsActive = true;
+        }
+        //confirmar los tokens colocar como los tokens del jugador, si el jugador es el ultimo pasar al juego, sino pasar al siguente jugador
+    }
+}

@@ -1,7 +1,4 @@
 .item-box {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     background-color: rgba(249, 249, 249, 0.537); 
     border: 1px solid rgb(204, 204, 204); 
     border-radius: 8px; 
