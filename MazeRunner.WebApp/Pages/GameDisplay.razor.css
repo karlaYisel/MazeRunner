@@ -1,0 +1,15 @@
+.cells-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
+    row-gap: 0;
+    column-gap: 0;
+    width: 80%;
+    max-width: 800px;
+    border-radius: 10px;
+}
+
+.row {
+    margin: 0;
+    padding: 0;
+    aspect-ratio: 1 / 1; 
+}

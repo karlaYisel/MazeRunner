@@ -1,3 +1,24 @@
 @page "/GameDisplay"
 
 <PageTitle>MazeRunner</PageTitle>
+
+<div class="cells-grid container">
+    @for (int x = 0; x < GM.maze.Grid.GetLength(0); x++)
+    {
+        <div class="row justify-content-center">
+        @for (int y = 0; y < GM.maze.Grid.GetLength(1); y++)
+        { 
+            <CellComponent Cell="@GM.maze.Grid[x, y]" OnClick="(args) => SelectCell(args.X, args.Y, args.token)" />
+        }
+        </div>
+    }
+</div>
+
+@code{
+    static GameManager GM = GameManager.GM;
+    //enum de estado de operacion, nada, mover, atacar, usar habilidad
+    //guardar token seleccionado
+
+    private void SelectCell(int X, int Y, Character? token = null)
+    {}
+}
