@@ -1,24 +1,479 @@
+@inject NavigationManager NavMg
+
 @page "/GameDisplay"
 
 <PageTitle>MazeRunner</PageTitle>
 
-<div class="cells-grid container">
-    @for (int x = 0; x < GM.maze.Grid.GetLength(0); x++)
-    {
-        <div class="row justify-content-center">
-        @for (int y = 0; y < GM.maze.Grid.GetLength(1); y++)
-        { 
-            <CellComponent Cell="@GM.maze.Grid[x, y]" OnClick="(args) => SelectCell(args.X, args.Y, args.token)" />
-        }
+<div class="container center-content" id="page-container">
+    <div class="container in-game-menu" id="player-menu">
+        <div class = "row justify-content-center">
+            <ItemDisplay path="@($"img/{numberOfActualPlayer}.png")" />
+        </div>        
+        <div class = "row justify-content-center">
+            <h2>Jugador @numberOfActualPlayer</h2>
+            <h3>@player.Name</h3>
+        </div>  
+        <div class = "row justify-content-center"> 
+            @switch(status)
+            {
+                case OperationStatus.ActionSelection:
+                    <button class="btn btn-menu" onclick="() => status = OperationStatus.TokenSelection;">Seleccionar Token</button>
+                    break;
+                case OperationStatus.TokenAction:
+                    @if(selectedToken is PlayableCharacter playable)
+                    {
+                        <button class="btn btn-menu" onclick="Move">Mover</button> 
+                        <button class="btn btn-menu" onclick="Attack">Atacar</button> 
+                        <button class="btn btn-menu" onclick="Ability">Especial</button>
+                    }
+                    break;
+                default:
+                    break;
+            }
+            @if(status !=  OperationStatus.Break && status != OperationStatus.MovingToken && status != OperationStatus.AttackingToken && status != OperationStatus.UsingAbilityToken)
+            {
+                @if(status != OperationStatus.ActionSelection)
+                {
+                    <button class="btn btn-menu" onclick="Back">Atrás</button>
+                }
+                <button class="btn btn-menu" onclick="PassTurn">Pasar Turno</button>
+            }
         </div>
-    }
+    </div>
+    <div class="maze-box">
+        <div class="cells-grid container" style="min-width: @(16*GM.maze.Width)px;">
+            @for (int x = 0; x < GM.maze.Grid.GetLength(0); x++)
+            {
+                <div class="row justify-content-center">
+                @for (int y = 0; y < GM.maze.Grid.GetLength(1); y++)
+                { 
+                    <CellComponent cell="@GM.maze.Grid[x, y]" selectedToken="@selectedToken" OnClick="(args) => Select(args.X, args.Y, args.token)" />
+                }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="textbox"> 
+        @for(int i = textForTextbox.Count - 1; i >= 0; i--)
+        {
+            <p>@textForTextbox[i]</p>
+        }
+    </div>
+    <div class="container in-game-menu" id="token-menu">
+        @if(selectedToken is not null)
+        {
+            <div class = "row justify-content-center">
+                <ItemDisplay path="@($"img/tokens/{selectedToken.GetType().Name}.png")" />
+            </div>        
+            <div class = "row justify-content-center">
+                <h2>@selectedToken.GetType().Name</h2>
+                <h3>Token de @playerIdx(GM.GetNumberOfPlayerByToken(selectedToken)).Name</h3>
+            </div>
+            <div class = "row justify-content-center">
+                <h3>Vida: @(selectedToken.CurrentLife)/@(selectedToken.MaxLife)</h3>
+                <h3>Defensa: @(selectedToken.Defense)</h3>
+                <h3>Fuerza: @(selectedToken.Strength)</h3>
+                <h3>Destreza: @(selectedToken.Ability)</h3>
+                <h3>Velocidad: @(selectedToken.Speed)</h3>
+                @if(selectedToken is PlayableCharacter playable)
+                {
+                    <h3>Ataque: @(playable.TypeOfAttack.ToString())</h3>
+                    <h3>Especial: @((GM.Turn - playable.LastTurnUsingAbility >= playable.AbilityRecoveryTime)? playable.AbilityRecoveryTime: GM.Turn - playable.LastTurnUsingAbility)/@(playable.AbilityRecoveryTime)</h3>
+                }
+            </div>
+            
+        }
+    </div>
 </div>
+
+@if(warningMessageIsActive)
+{
+    <MessageBox title="Advertencia:" message="@message" btnMessageConfirm="De Acuerdo" isWithTwoButtons="false" OnConfirm="Confirm" />
+}
+
+@if(winningMessageIsActive)
+{
+    <MessageBox title="Juego Completado:" message="@winningMessage" btnMessageConfirm="Volver al Inicio" isWithTwoButtons="false" OnConfirm="GoHome" />
+}
 
 @code{
     static GameManager GM = GameManager.GM;
-    //enum de estado de operacion, nada, mover, atacar, usar habilidad
-    //guardar token seleccionado
+    static MovementManager MM = MovementManager.MM;
+    static AttackManager AM = AttackManager.AM;
+    static NonActiveTurnManager NATM = NonActiveTurnManager.NATM;
+    private static List<string> textForTextbox = new List<string>();
+    private static List<Player> winners = new List<Player>();
+    private static string winningMessage{
+        get{
+            string _message = "Felicidades!!!</br>";
+            if(GM.IsCoopGame)
+            {
+                _message += $"Los jugadores ";
+                for(int i = 0; i < winners.Count; i++)
+                {
+                    _message += winners[i].Name;
+                    if(i != winners.Count - 1)
+                    {
+                        _message += ", ";
+                    }
+                }
+                _message += " han ganado el juego";
+            }
+            else _message += $"El jugador {winners[0].GetType().Name} ha ganado el juego.";
+            return _message;
+        }
+    }
+    private static bool winningMessageIsActive = false;
+    private static string message = "";
+    private static bool warningMessageIsActive = false;
+    private static int numberOfActualPlayer = 1;
+    private static Player player{
+        get{
+            if(numberOfActualPlayer <= GM.ActivePlayers.Count) return GM.ActivePlayers[numberOfActualPlayer - 1];
+            else return GM.NonActivePlayers[numberOfActualPlayer - GM.ActivePlayers.Count - 1];
+        }
+    }
+    private static OperationStatus status = OperationStatus.ActionSelection;
+    private static Character? selectedToken = null;
+    //css edit
+    //poner menu en la barra cuando estamos en esta pagina y sus respectivas funciones
+    //agregar resto de trampas, obstaculos y personajes, ponerlos en el enum, hacer img y hacrlos
+    //estilizar
+    private enum OperationStatus
+    {
+        Break,
+        ActionSelection,
+        TokenSelection,
+        TokenAction,
+        MoveToken,
+        MovingToken,
+        AttackToken,
+        AttackingToken,
+        AbilityToken,
+        UsingAbilityToken,
+    }
 
-    private void SelectCell(int X, int Y, Character? token = null)
-    {}
+    protected override void OnInitialized()
+    {
+        GM.DefetedToken += DefetedMessage;
+        GM.HealedToken += HealedMessage;
+        GM.DemagedToken += DemagedMessage;
+        GM.PlayerWon += PlayerVictory;
+        AddText(["El juego ha comenzado."]);
+        AddText([$"Turno del jugador {numberOfActualPlayer}, {player.Name}."]);
+    }
+
+    private static Player playerIdx(int index)
+    {
+        if(index < 1 || index > 5) return new Player("UNKNOWN");
+        if(index <= GM.ActivePlayers.Count) return GM.ActivePlayers[index - 1];
+        else return GM.NonActivePlayers[index - GM.ActivePlayers.Count - 1];
+    }
+
+    private static void Confirm(bool isConfirmed)
+    {
+        if (isConfirmed)
+        {
+            warningMessageIsActive = false;
+        }
+    }
+
+    private void GoHome()
+    {
+        NavMg.NavigateTo("/Home");    
+    }
+
+    private static void AddText(string[] text)
+    {
+        for(int i = 0; i < text.Length; i++)
+        {
+            textForTextbox.Add(text[i]);
+        }
+        for(int i = 0; i < textForTextbox.Count - 100; i++)
+        {
+            textForTextbox.RemoveAt(0);
+        }
+    }
+
+    private static void Select(int X, int Y, Character? token = null)
+    {
+        switch(status)
+        {
+            case OperationStatus.TokenSelection:
+                if(token is not null)
+                {
+                    if(player.Tokens.Contains(token))
+                    {
+                        selectedToken = token;
+                        status = OperationStatus.TokenAction;
+                    }
+                    else
+                    {
+                        message = $"Debe seleccionar un token perteneciente a su jugador.</br>Colores:</br>Jugador 1 - {GM.colors[0]}</br>Jugador 2 - {GM.colors[1]}</br>Jugador 3 - {GM.colors[2]}</br>Jugador 4 - {GM.colors[3]}</br>NPC - {GM.colors[4]}";
+                        warningMessageIsActive = true;
+                    }
+                }
+                break;
+            case OperationStatus.MoveToken:
+                Cell destinyCell = GM.maze.Grid[X, Y];
+                if(destinyCell.IsColored && selectedToken is PlayableCharacter playableMT)
+                {
+                    status = OperationStatus.MovingToken;
+                    MM.MoveToken(selectedToken, destinyCell, selectedToken.Speed);
+                    playableMT.Moved();
+                    MM.CleanColor();
+                    status = OperationStatus.TokenAction;
+                }
+                break;
+            case OperationStatus.AttackToken:
+                if(selectedToken is PlayableCharacter playable && token is not null && token.IsTargeted)
+                {
+                    status = OperationStatus.AttackingToken;
+                    int opponentInitialLife = token.CurrentLife;
+                    AddText([$"{selectedToken.GetType().Name} decide atacar a {token.GetType().Name}."]);
+                    Thread.Sleep(100);
+                    if(selectedToken.Attack(token))
+                    {
+                        AddText(["Y el ataque es efectivo."]);
+                        Thread.Sleep(100);
+                        GM.StabilizeToken(token);
+                        if(opponentInitialLife > token.CurrentLife) GM.EventDemagedToken(token, selectedToken, opponentInitialLife - token.CurrentLife);
+                        else if(opponentInitialLife < token.CurrentLife) GM.EventHealedToken(token, selectedToken, token.CurrentLife - opponentInitialLife);
+                        GM.EventChangeInMazeMade();
+                    }
+                    else
+                    {
+                        AddText(["Pero no es efectivo."]);
+                        Thread.Sleep(100);
+                    }
+                    AM.CleanTargets();
+                    playable.Attacked();
+                    status = OperationStatus.TokenAction;
+                }
+                break;
+            case OperationStatus.AbilityToken:
+                if(selectedToken is PlayableCharacter playableAT)
+                {
+                    status = OperationStatus.UsingAbilityToken;
+                    switch(selectedToken.GetType().Name)
+                    {
+                        case "Hero":
+                            if(token is not null && token.IsTargeted)
+                            {
+                                int opponentInitialLife = token.CurrentLife;
+                                AddText([$"{selectedToken.GetType().Name} decide usar su habilidad ''Espada Sagrada'' en {token.GetType().Name}."]);
+                                Thread.Sleep(100);
+                                if(playableAT.ActivateAbility(GM.Turn, token))
+                                {
+                                    AddText(["Y es efectivo."]);
+                                    Thread.Sleep(100);
+                                    GM.StabilizeToken(token);
+                                    if (opponentInitialLife > token.CurrentLife)
+                                    {
+                                        GM.EventDemagedToken(token, selectedToken, opponentInitialLife - token.CurrentLife);
+                                    }
+                                    else if (opponentInitialLife < token.CurrentLife)
+                                    {
+                                        GM.EventHealedToken(token, selectedToken, token.CurrentLife - opponentInitialLife);
+                                    }
+                                    GM.EventChangeInMazeMade();
+                                }
+                                else
+                                {
+                                    AddText(["Pero no es efectivo."]);
+                                    Thread.Sleep(100);
+                                }
+                                AM.CleanTargets();
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    status = OperationStatus.TokenAction;
+                }
+                break;
+            case OperationStatus.TokenAction or OperationStatus.MovingToken or OperationStatus.AttackingToken or OperationStatus.UsingAbilityToken:
+                break;
+            default:
+                if(token is not null) selectedToken = token;
+                break;
+        }
+    }
+
+    private static void Move()
+    {
+        if(selectedToken is PlayableCharacter playable && playable.HasMoved == false)
+        {
+            List<(Cell cell, int distance)> cellsWithDistance = MM.GetCellsInRange(GM.maze.Grid[selectedToken.X, selectedToken.Y], selectedToken.Speed);
+            List<Cell> cells = new List<Cell>();
+            foreach ((Cell cell, int distance) cell in cellsWithDistance)
+            {
+                cells.Add(cell.cell);
+            }
+            MM.ColorCells(cells);
+            status = OperationStatus.MoveToken;
+        }
+        else
+        {
+            message = "El token seleccionado no es jugable o ya se ha movido en este turno.";
+            warningMessageIsActive = true;
+        }
+    }
+
+    private static void Attack()
+    {
+        if(selectedToken is PlayableCharacter playable && playable.HasAttacked == false)
+        {
+            List<Character> opponents = AM.GetPossibleOpponents(playable);
+            AM.TargetCharacters(opponents);
+            status = OperationStatus.AttackToken;
+        }
+        else
+        {
+            message = "El token seleccionado no es jugable o ya ha atacado en este turno.";
+            warningMessageIsActive = true;
+        }
+    }
+
+    private static void Ability()
+    {
+        if(selectedToken is PlayableCharacter playable && playable.LastTurnUsingAbility + playable.AbilityRecoveryTime - GM.Turn <= 0)
+        {
+            switch(playable.GetType().Name)
+            {
+                case "Hero":
+                    List<Character> opponents = AM.GetPossibleOpponents(selectedToken);
+                    AM.TargetCharacters(opponents);
+                    status = OperationStatus.AbilityToken;
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            message = "El token seleccionado no es jugable o aún no ha recargado su habilidad especial.";
+            warningMessageIsActive = true;
+        }
+    }
+
+    private static void Back()
+    {
+        switch(status)
+        {
+            case OperationStatus.MoveToken or OperationStatus.AttackToken or OperationStatus.AbilityToken:
+                MM.CleanColor();
+                AM.CleanTargets();
+                status = OperationStatus.TokenAction;
+                break;
+            case OperationStatus.TokenSelection or OperationStatus.TokenAction:
+                MM.CleanColor();
+                AM.CleanTargets();
+                status = OperationStatus.ActionSelection;
+                break;
+            default:
+                break;
+        }
+    }
+
+    private static void PassTurn()
+    {
+        MM.CleanColor();
+        AM.CleanTargets();
+        status = OperationStatus.Break;
+        selectedToken = null;
+        numberOfActualPlayer++;
+        if(numberOfActualPlayer <= GM.ActivePlayers.Count)
+        {
+            AddText([$"Turno del jugador {numberOfActualPlayer}, {player.Name}."]);
+            status = OperationStatus.ActionSelection;
+        }
+        else if(numberOfActualPlayer == 5)
+        {
+            foreach (NPC nonPlayable in GM.NonActivePlayers[4 - GM.ActivePlayers.Count].Tokens)
+            {
+                NATM.PerformTurn(nonPlayable);
+            }
+            numberOfActualPlayer = 1;
+            GM.EventPassTurn();
+        }
+        else if(GM.PlayWithBots)
+        {
+            //foreach(PlayableCharacter playable in player.Tokens)
+            //{
+            //    NATM.TakeTurn(playable)
+            //}
+            PassTurn();
+        }
+        else
+        {
+            PassTurn();
+        }
+    }
+
+    public static void DefetedMessage(Character affectedCharacter, Interactive? modificaterObject, int modificator)
+    {
+        if(modificator == 0)
+        {
+            string text = $"{affectedCharacter.GetType().Name} ha sido derrotado";
+            if (modificaterObject is not null) text += $" por {modificaterObject.GetType().Name}.";
+            else text += ".";
+            AddText([text]);
+        }
+    }
+
+    public static void HealedMessage(Character affectedCharacter, Interactive? modificaterObject, int modificator)
+    {
+        if(modificator <= 0)
+        {
+            AddText([$"{affectedCharacter.GetType().Name} se mantiene igual."]);
+            if (modificaterObject is not null) AddText([$"{modificaterObject.GetType().Name} no efectivo."]);
+        }
+        else
+        {
+            string text = $"{affectedCharacter.GetType().Name} ha restaurado {modificator} de vida";
+            if (modificaterObject is not null) text += $" gracias a {modificaterObject.GetType().Name}.";
+            else text += ".";
+            AddText([text]);
+        }
+    }
+
+    public static void DemagedMessage(Character affectedCharacter, Interactive? modificaterObject, int modificator)
+    {
+        if(modificator <= 0)
+        {
+            AddText([$"{affectedCharacter.GetType().Name} se mantiene igual."]);
+            if (modificaterObject is not null) AddText([$"{modificaterObject.GetType().Name} no efectivo."]);
+        }
+        else
+        {
+            string text = $"{affectedCharacter.GetType().Name} ha perdido {modificator} de vida";
+            if (modificaterObject is not null) text += $" debido a {modificaterObject.GetType().Name}.";
+            else text += ".";
+            AddText([text]);
+        }
+    }
+
+    public static void PlayerVictory(Player winner)
+    {
+        int numberOfPlayer = 5;
+        if (GM.ActivePlayers.Contains(winner)) numberOfPlayer = GM.ActivePlayers.IndexOf(winner);
+        else if (GM.NonActivePlayers.Contains(winner)) numberOfPlayer = GM.NonActivePlayers.IndexOf(winner) + GM.ActivePlayers.Count;
+        if (numberOfPlayer < 5)
+        {
+            if (GM.IsCoopGame)
+            {
+                numberOfPlayer %= 2;
+                if (GM.ActivePlayers.Count > numberOfPlayer + 2) winner = GM.ActivePlayers[numberOfPlayer + 2];
+                else winner = GM.NonActivePlayers[numberOfPlayer + 2 - GM.ActivePlayers.Count];
+                winners.Add(GM.ActivePlayers[numberOfPlayer]);
+                winners.Add(winner);
+            }
+            else
+            {
+                winners.Add(winner);
+            }
+            winningMessageIsActive = true;
+        }
+    }
 }

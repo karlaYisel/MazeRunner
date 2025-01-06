@@ -1,15 +1,190 @@
+#page-container{
+    position: relative;
+    width: 100vw;
+    height: 90vh;
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+    display: flex;
+    overflow: auto;
+}
+
+.maze-box{
+    aspect-ratio: 1/ 1;
+    border: 2px solid rgb(0, 0, 0);
+    overflow: auto;
+    position: relative;
+    padding: 0;
+}
+
 .cells-grid{
+    margin: 0;
+    padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(16px, 1fr));
+    aspect-ratio: 1 / 1;
     row-gap: 0;
     column-gap: 0;
-    width: 80%;
-    max-width: 800px;
-    border-radius: 10px;
+    width: 100%;
+    position: absolute;
 }
 
 .row {
     margin: 0;
     padding: 0;
     aspect-ratio: 1 / 1; 
+}
+
+.textbox{
+    overflow: auto;
+}
+
+@media (width > height)
+{
+    @media(width >= (300px + ((height)*(0.9))))
+    {
+        .in-game-menu{
+            overflow: auto;
+            width: ((100vw - 90vh)/2);
+        }
+
+        #player-menu{
+            height: 90vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #token-menu{
+            height: 60vh;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        .maze-box{
+            height: 90%;
+            position: absolute;
+            top: 0;
+            right: ((100% - 90vh)/2);
+        }
+
+        .textbox{
+            overflow: auto;
+            width: ((100% - 90vh)/2);
+            height: 30vh;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+    }
+    @media(width < (300px + ((height)*(0.9))))
+    {
+        .in-game-menu{
+            overflow: auto;
+            width: 200px;
+            height: 90vh;
+            position: absolute;
+            top: 0;
+        }
+
+        #player-menu{
+            left: 0;
+        }
+
+        #token-menu{
+            right: 0;
+        }
+
+        .maze-box{
+            width: (100% - 400px);
+            position: absolute;
+            bottom: 0;
+            right: 200px;
+        }
+
+        .textbox{
+            overflow: auto;
+            width: (100% - 400px);
+            height: (90vh + 400px - 100vw);
+            position: absolute;
+            top: 0;
+            right: 200px;
+        }
+    }
+}
+
+@media (width <= height)
+{
+    @media(width <= (((height)*(0.9)) - 300px))
+    {
+        .in-game-menu{
+            overflow: auto;
+            height: ((90vh - 100vw)/2);
+        }
+
+        #player-menu{
+            width: 100vw;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #token-menu{
+            width: 70vw;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        .maze-box{
+            width: 100%;
+            position: absolute;
+            top: ((90vh - 100vw)/2);
+            right: 0;
+        }
+
+        .textbox{
+            overflow: auto;
+            height: ((90vh - 100vw)/2);
+            width: 30vw;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+    }
+    @media(width > (((height)*(0.9)) - 300px))
+    {
+        .in-game-menu{
+            overflow: auto;
+            height: 200px;
+            width: 100vw;
+            position: absolute;
+            left: 0;
+        }
+
+        #player-menu{
+            top: 0;
+        }
+
+        #token-menu{
+            bottom: 0;
+        }
+
+        .maze-box{
+            height: (90vh - 400px);
+            position: absolute;
+            top: 200px;
+            right: 0;
+        }
+
+        .textbox{
+            overflow: auto;
+            height: (90vh - 400px);
+            width: 100vw + 400px - 90vh;
+            position: absolute;
+            top: 200px;
+            left: 0;
+        }
+    }
 }

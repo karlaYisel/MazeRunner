@@ -14,6 +14,7 @@ namespace MazeRunner.Core.GameSystem
         private static readonly object _lock = new object();
         public List<Player> ActivePlayers { get; private set;} = new List<Player>();
         public List<Player> NonActivePlayers { get; private set;} = new List<Player>();
+        public string[] colors = new string[5]{"blue", "red", "green", "yellow", "gray"}; // Maybe edit this to allow the players choose the colors
         public event PlayerMessage? DefetedToken;
         public event PlayerMessage? DemagedToken;
         public event PlayerMessage? HealedToken;
@@ -235,7 +236,24 @@ namespace MazeRunner.Core.GameSystem
                     token.ChangeState();
                     GM.NonActivePlayers[GM.NonActivePlayers.Count - 1].Tokens.Remove(token);
                 }
+                EventDefetedToken(token, null, 0);
             }
+        }
+
+        public int GetNumberOfPlayerByToken(Character? character)
+        {
+            if (character is not null)
+            {
+                foreach(Player player in ActivePlayers)
+                {
+                    if (player.Tokens.Contains(character)) return ActivePlayers.IndexOf(player) + 1;
+                }
+                foreach(Player player in NonActivePlayers)
+                {
+                    if (player.Tokens.Contains(character)) return NonActivePlayers.IndexOf(player) + ActivePlayers.Count + 1;
+                }
+            }
+            return 0;
         }
 
     }

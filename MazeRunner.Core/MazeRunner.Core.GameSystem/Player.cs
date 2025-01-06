@@ -4,12 +4,6 @@ using MazeRunner.Core.InteractiveObjects;
 
 namespace MazeRunner.Core.GameSystem
 {
-    public enum OptionsByPlayer
-    {
-        SelectToken,
-        SkipTurn,
-    }
-
     public class Player
     {
         public string Name { get; private set; }

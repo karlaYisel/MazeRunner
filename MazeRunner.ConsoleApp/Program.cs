@@ -201,12 +201,12 @@ namespace MazeRunner.ConsoleApp
                                 NATM.PerformTurn(nonPlayable);
                             }
                         }
-                        else if (GM.IsCoopGame)
+                        else if (GM.PlayWithBots)
                         {
                             //player = GM.NonActivePlayers[i - GM.ActivePlayers.Count];
                             //foreach(PlayableCharacter playable in player.Tokens)
                             //{
-                            //    GM.NATM.TakeTurn(Playable)
+                            //    NATM.TakeTurn(playable)
                             //}
                         }
                     }
@@ -394,7 +394,8 @@ namespace MazeRunner.ConsoleApp
                 }
             }
         }
-
+/**/
+/**/
         private static void GameMenu()
         {
             string? option;
@@ -704,11 +705,6 @@ namespace MazeRunner.ConsoleApp
                     break;
             }
         }
-
-        //turnos
-        //player
-        //items
-        //tokens
 
         public static void DefetedMessage(Character affectedCharacter, Interactive? modificaterObject, int modificator)
         {
