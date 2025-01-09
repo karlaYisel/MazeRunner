@@ -17,14 +17,14 @@
             @switch(status)
             {
                 case OperationStatus.ActionSelection:
-                    <button class="btn btn-menu" onclick="() => status = OperationStatus.TokenSelection;">Seleccionar Token</button>
+                    <button class="btn btn-menu" @onclick="() => status = OperationStatus.TokenSelection">Seleccionar Token</button>
                     break;
                 case OperationStatus.TokenAction:
                     @if(selectedToken is PlayableCharacter playable)
                     {
-                        <button class="btn btn-menu" onclick="Move">Mover</button> 
-                        <button class="btn btn-menu" onclick="Attack">Atacar</button> 
-                        <button class="btn btn-menu" onclick="Ability">Especial</button>
+                        <button class="btn btn-menu" @onclick="Move">Mover</button> 
+                        <button class="btn btn-menu" @onclick="Attack">Atacar</button> 
+                        <button class="btn btn-menu" @onclick="Ability">Especial</button>
                     }
                     break;
                 default:
@@ -34,9 +34,9 @@
             {
                 @if(status != OperationStatus.ActionSelection)
                 {
-                    <button class="btn btn-menu" onclick="Back">Atrás</button>
+                    <button class="btn btn-menu" @onclick="Back">Atrás</button>
                 }
-                <button class="btn btn-menu" onclick="PassTurn">Pasar Turno</button>
+                <button class="btn btn-menu" @onclick="PassTurn">Pasar Turno</button>
             }
         </div>
     </div>
@@ -180,7 +180,7 @@
 
     private void GoHome()
     {
-        NavMg.NavigateTo("/Home");    
+        NavMg.NavigateTo("/");    
     }
 
     private static void AddText(string[] text)
@@ -394,8 +394,11 @@
             {
                 NATM.PerformTurn(nonPlayable);
             }
+            MM.CleanColor();
+            AM.CleanTargets();
             numberOfActualPlayer = 1;
             GM.EventPassTurn();
+            status = OperationStatus.ActionSelection;
         }
         else if(GM.PlayWithBots)
         {

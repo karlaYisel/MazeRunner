@@ -6,7 +6,6 @@
     padding: 0;
     line-height: 0;
     display: flex;
-    overflow: auto;
 }
 
 .maze-box{
@@ -39,13 +38,13 @@
     overflow: auto;
 }
 
-@media (width > height)
+@media(min-width: calc(90vh))
 {
-    @media(width >= (300px + ((height)*(0.9))))
+    @media(min-width: calc(90vh + 300px))
     {
         .in-game-menu{
             overflow: auto;
-            width: ((100vw - 90vh)/2);
+            width: calc((100vw - 90vh)/2);
         }
 
         #player-menu{
@@ -59,26 +58,26 @@
             height: 60vh;
             position: absolute;
             bottom: 0;
-            right: 0;
+            left: calc((100vw + 90vh)/2);
         }
 
         .maze-box{
-            height: 90%;
+            height: 90vh;
             position: absolute;
             top: 0;
-            right: ((100% - 90vh)/2);
+            left: calc((100vw - 90vh)/2);
         }
 
         .textbox{
             overflow: auto;
-            width: ((100% - 90vh)/2);
+            width: calc((100vw - 90vh)/2);
             height: 30vh;
             position: absolute;
             top: 0;
-            right: 0;
+            left: calc((100vw + 90vh)/2);
         }
     }
-    @media(width < (300px + ((height)*(0.9))))
+    @media(max-width: calc(90vh+ 300px - 0.5px))
     {
         .in-game-menu{
             overflow: auto;
@@ -93,34 +92,34 @@
         }
 
         #token-menu{
-            right: 0;
+            left: calc((100vw + 400px)/2);;
         }
 
         .maze-box{
-            width: (100% - 400px);
+            width: calc((100vw - 400px)/2);
             position: absolute;
             bottom: 0;
-            right: 200px;
+            left: 200px;
         }
 
         .textbox{
             overflow: auto;
-            width: (100% - 400px);
-            height: (90vh + 400px - 100vw);
+            width: calc((100vw - 400px)/2);
+            height: calc(90vh + 400px - 100vw);
             position: absolute;
             top: 0;
-            right: 200px;
+            left: 200px;
         }
     }
 }
 
-@media (width <= height)
+@media(max-width: calc(90vh - 0.5px))
 {
-    @media(width <= (((height)*(0.9)) - 300px))
+    @media(max-width: calc(90vh- 300px - 0.5px))
     {
         .in-game-menu{
             overflow: auto;
-            height: ((90vh - 100vw)/2);
+            height: calc((90vh - 100vw)/2);
         }
 
         #player-menu{
@@ -134,26 +133,27 @@
             width: 70vw;
             position: absolute;
             bottom: 0;
-            right: 0;
+            left: 30vh;
         }
 
         .maze-box{
             width: 100%;
             position: absolute;
-            top: ((90vh - 100vw)/2);
-            right: 0;
+            top: calc((90vh - 100vw)/2);
+            left: 0;
         }
 
         .textbox{
             overflow: auto;
-            height: ((90vh - 100vw)/2);
+            height: calc((90vh - 100vw)/2);
             width: 30vw;
             position: absolute;
             bottom: 0;
             left: 0;
         }
     }
-    @media(width > (((height)*(0.9)) - 300px))
+
+    @media(min-width: calc(90vh- 300px))
     {
         .in-game-menu{
             overflow: auto;
@@ -172,16 +172,16 @@
         }
 
         .maze-box{
-            height: (90vh - 400px);
+            height: calc(90vh - 400px);
             position: absolute;
             top: 200px;
-            right: 0;
+            left: calc(100vw + 400px - 90vh);
         }
 
         .textbox{
             overflow: auto;
-            height: (90vh - 400px);
-            width: 100vw + 400px - 90vh;
+            height: calc(90vh - 400px);
+            width: calc(100vw + 400px - 90vh);
             position: absolute;
             top: 200px;
             left: 0;
