@@ -3,6 +3,10 @@ namespace MazeRunner.Core.InteractiveObjects
     public enum TypeOfTrap
     {
         SpikeTrap,
+        PrisonTrap,
+        FireTrap,
+        IceTrap,
+        PoisonTrap,
     }
 
     public abstract class Trap: Interactive

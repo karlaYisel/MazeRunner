@@ -3,6 +3,8 @@ namespace MazeRunner.Core.InteractiveObjects
     public enum TypeOfObstacle
     {
         TemporalWall,
+        DelayObstacle,
+        PermanentDelayObstacle,
     }
 
     public abstract class Obstacle: Interactive

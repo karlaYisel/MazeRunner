@@ -2,6 +2,13 @@ using System.Threading;
 
 namespace MazeRunner.Core.InteractiveObjects
 {
+    public enum TypeOfState
+    {
+        Burned,
+        Iced,
+        Poisoned,
+    }
+
     public abstract class Character: Interactive
     {
         public int X  { get; protected set; }
@@ -13,6 +20,9 @@ namespace MazeRunner.Core.InteractiveObjects
         public int Strength { get; protected set; }
         public int Ability { get; protected set; }
         public int Speed { get; protected set; }
+        public int RemainingStepsBurned { get; protected set; }
+        public int RemainingTurnsIced { get; protected set; }
+        public int RemainingTurnsPoisoned { get; protected set; }
 
         public void ChangeTargetStatus()
         {
@@ -42,6 +52,16 @@ namespace MazeRunner.Core.InteractiveObjects
             {
                 return false;
             }
+        }
+
+        public void ChangeStates(int burn, int ice, int poison)
+        {
+            RemainingStepsBurned += burn;
+            if(RemainingStepsBurned < 0) RemainingStepsBurned = 0;
+            RemainingTurnsIced += ice;
+            if(RemainingTurnsIced < 0) RemainingTurnsIced = 0;
+            RemainingTurnsPoisoned += poison;
+            if(RemainingTurnsPoisoned < 0) RemainingTurnsPoisoned = 0;
         }
     }
 }

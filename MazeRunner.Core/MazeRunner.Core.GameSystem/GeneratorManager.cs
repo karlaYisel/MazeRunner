@@ -88,6 +88,10 @@ namespace MazeRunner.Core.GameSystem
                         {
                             GM.ChangeInTurnMade += temporalWall.StabilizeWall;
                         }
+                        if (actualCell.Interactive is DelayObstacle delayObstacle)
+                        {
+                            GM.ChangeInTurnMade += delayObstacle.StabilizeWall;
+                        }
                     }
                 }
                 return true;
@@ -163,8 +167,20 @@ namespace MazeRunner.Core.GameSystem
                     case "TemporalWall":
                         parameter = [random.Next(1, 6)]; 
                         break;
+                    case "DelayObstacle":
+                        parameter = [random.Next(1, 4), random.Next(2, 5)]; 
+                        break;
+                    case "PermanentDelayObstacle":
+                        parameter = [random.Next(2, 5)]; 
+                        break;
                     case "SpikeTrap":
                         parameter = [random.Next(4, 11)]; 
+                        break;
+                    case "PrisonTrap":
+                        parameter = []; 
+                        break;
+                    case "FireTrap" or "IceTrap" or "PoisonTrap":
+                        parameter = [random.Next(4, 11), random.Next(0, 3), random.Next(1, 6)]; 
                         break;
                     case "NPC":
                         string value = random.Next(0, Enum.GetValues(typeof(TypeOfNPC)).Length).ToString();

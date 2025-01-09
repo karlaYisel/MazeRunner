@@ -3,6 +3,17 @@
     @if(cell.Interactive is not null && cell.Interactive.ActualState == State.Active)
     {
         <img style="z-index: 2;" src="@interactivePath" alt="@($"cell_{cell.X}_{cell.Y}.png")" class="img-fluid cell-image" @onclick="_OnClick">
+        @if(Thickness < 5)
+        {
+            @if(Thickness > 2)
+            {
+                <img style="z-index: 3;" src="img/cells/lotus.png" alt="@($"cell_{cell.X}_{cell.Y}.png")" class="img-fluid cell-image" @onclick="_OnClick">
+            }
+            @if(Thickness > 3)
+            {
+                <img style="z-index: 4;" src="img/cells/woods.png" alt="@($"cell_{cell.X}_{cell.Y}.png")" class="img-fluid cell-image" @onclick="_OnClick">
+            }
+        }
     }
     @if(GM.EndPoints.Contains(cell))
     {
@@ -10,45 +21,69 @@
     }
     @if(cell.IsColored)
     {
-        <img style="z-index: 3;" src="img/cells/colored.png" alt="@($"cell_{cell.X}_{cell.Y}.png")" class="img-fluid cell-image" @onclick="_OnClick">
+        <img style="z-index: 5;" src="img/cells/colored.png" alt="@($"cell_{cell.X}_{cell.Y}.png")" class="img-fluid cell-image" @onclick="_OnClick">
     }    
     @if(characters.Count > 0)
     {
-        <img style="z-index: 4;" src="@($"img/tokens/{GM.colors[GM.GetNumberOfPlayerByToken(characters[0]) - 1]}.png")" alt="@($"cell_{cell.X}_{cell.Y}_token1.png")" class="img-fluid @($"cell-image-1token{characters.Count}")" @onclick="() => _OnClickToken(0)">
+        <img style="z-index: 6;" src="@($"img/tokens/{GM.colors[GM.GetNumberOfPlayerByToken(characters[0]) - 1]}.png")" alt="@($"cell_{cell.X}_{cell.Y}_token1.png")" class="img-fluid @($"cell-image-1token{characters.Count}")" @onclick="() => _OnClickToken(0)">
         @if(selectedToken is not null && selectedToken.Equals(characters[0]))
         {
-            <img style="z-index: 5;" src="img/tokens/selected.png" alt="@($"cell_{cell.X}_{cell.Y}_token1.png")" class="img-fluid @($"cell-image-1token{characters.Count}")" @onclick="() => _OnClickToken(0)">
+            <img style="z-index: 7;" src="img/tokens/selected.png" alt="@($"cell_{cell.X}_{cell.Y}_token1.png")" class="img-fluid @($"cell-image-1token{characters.Count}")" @onclick="() => _OnClickToken(0)">
         }        
         @if(characters[0].IsTargeted)
         {
-            <img style="z-index: 6;" src="img/tokens/targered.png" alt="@($"cell_{cell.X}_{cell.Y}_token1.png")" class="img-fluid @($"cell-image-1token{characters.Count}")" @onclick="() => _OnClickToken(0)">
+            <img style="z-index: 8;" src="img/tokens/targered.png" alt="@($"cell_{cell.X}_{cell.Y}_token1.png")" class="img-fluid @($"cell-image-1token{characters.Count}")" @onclick="() => _OnClickToken(0)">
         }
         @if(characters[0] is NPC)
         {
-            <img style="z-index: 7;" src="img/tokens/NPC.png" alt="@($"cell_{cell.X}_{cell.Y}_token1.png")" class="img-fluid @($"cell-image-1token{characters.Count}")" @onclick="() => _OnClickToken(0)">
+            <img style="z-index: 9;" src="img/tokens/NPC.png" alt="@($"cell_{cell.X}_{cell.Y}_token1.png")" class="img-fluid @($"cell-image-1token{characters.Count}")" @onclick="() => _OnClickToken(0)">
         }
         else
         {
-            <img style="z-index: 7;" src="@($"img/tokens/{characters[0].GetType().Name}.png")" alt="@($"cell_{cell.X}_{cell.Y}_token1.png")" class="img-fluid @($"cell-image-1token{characters.Count}")" @onclick="() => _OnClickToken(0)">
+            <img style="z-index: 9;" src="@($"img/tokens/{characters[0].GetType().Name}.png")" alt="@($"cell_{cell.X}_{cell.Y}_token1.png")" class="img-fluid @($"cell-image-1token{characters.Count}")" @onclick="() => _OnClickToken(0)">
+        }
+        @if(characters[0].RemainingStepsBurned > 0)
+        {
+            <img style="z-index: 10;" src="img/tokens/fire.png" alt="@($"cell_{cell.X}_{cell.Y}_token1.png")" class="img-fluid @($"fire-1token{characters.Count}")" @onclick="() => _OnClickToken(0)">
+        }
+        @if(characters[0].RemainingTurnsIced > 0)
+        {
+            <img style="z-index: 10;" src="img/tokens/ice.png" alt="@($"cell_{cell.X}_{cell.Y}_token1.png")" class="img-fluid @($"ice-1token{characters.Count}")" @onclick="() => _OnClickToken(0)">
+        }
+        @if(characters[0].RemainingTurnsPoisoned > 0)
+        {
+            <img style="z-index: 10;" src="img/tokens/poison.png" alt="@($"cell_{cell.X}_{cell.Y}_token1.png")" class="img-fluid @($"poison-1token{characters.Count}")" @onclick="() => _OnClickToken(0)">
         }
         @if(characters.Count > 1)
         {
-            <img style="z-index: 4;" src="@($"img/tokens/{GM.colors[GM.GetNumberOfPlayerByToken(characters[1]) - 1]}.png")" alt="@($"cell_{cell.X}_{cell.Y}_token2.png")" class="img-fluid cell-image-2token2" @onclick="() => _OnClickToken(1)">
+            <img style="z-index: 6;" src="@($"img/tokens/{GM.colors[GM.GetNumberOfPlayerByToken(characters[1]) - 1]}.png")" alt="@($"cell_{cell.X}_{cell.Y}_token2.png")" class="img-fluid cell-image-2token2" @onclick="() => _OnClickToken(1)">
             @if(selectedToken is not null && selectedToken.Equals(characters[1]))
             {
-                <img style="z-index: 5;" src="img/tokens/selected.png" alt="@($"cell_{cell.X}_{cell.Y}_token2.png")" class="img-fluid cell-image-2token2" @onclick="() => _OnClickToken(1)">
+                <img style="z-index: 7;" src="img/tokens/selected.png" alt="@($"cell_{cell.X}_{cell.Y}_token2.png")" class="img-fluid cell-image-2token2" @onclick="() => _OnClickToken(1)">
             }        
             @if(characters[1].IsTargeted)
             {
-                <img style="z-index: 6;" src="img/tokens/targered.png" alt="@($"cell_{cell.X}_{cell.Y}_token2.png")" class="img-fluid cell-image-2token2" @onclick="() => _OnClickToken(1)">
+                <img style="z-index: 8;" src="img/tokens/targered.png" alt="@($"cell_{cell.X}_{cell.Y}_token2.png")" class="img-fluid cell-image-2token2" @onclick="() => _OnClickToken(1)">
             }
             @if(characters[1] is NPC)
             {
-                <img style="z-index: 7;" src="img/tokens/NPC.png" alt="@($"cell_{cell.X}_{cell.Y}_token2.png")" class="img-fluid cell-image-2token2" @onclick="() => _OnClickToken(1)">
+                <img style="z-index: 9;" src="img/tokens/NPC.png" alt="@($"cell_{cell.X}_{cell.Y}_token2.png")" class="img-fluid cell-image-2token2" @onclick="() => _OnClickToken(1)">
             }
             else
             {
-                <img style="z-index: 7;" src="@($"img/tokens/{characters[1].GetType().Name}.png")" alt="@($"cell_{cell.X}_{cell.Y}_token2.png")" class="img-fluid cell-image-2token2" @onclick="() => _OnClickToken(1)">
+                <img style="z-index: 9;" src="@($"img/tokens/{characters[1].GetType().Name}.png")" alt="@($"cell_{cell.X}_{cell.Y}_token2.png")" class="img-fluid cell-image-2token2" @onclick="() => _OnClickToken(1)">
+            }
+            @if(characters[0].RemainingStepsBurned > 0)
+            {
+                <img style="z-index: 10;" src="img/tokens/fire.png" alt="@($"cell_{cell.X}_{cell.Y}_token2.png")" class="img-fluid @($"fire-2token{characters.Count}")" @onclick="() => _OnClickToken(1)">
+            }
+            @if(characters[0].RemainingTurnsIced > 0)
+            {
+                <img style="z-index: 10;" src="img/tokens/ice.png" alt="@($"cell_{cell.X}_{cell.Y}_token2.png")" class="img-fluid @($"ice-2token{characters.Count}")" @onclick="() => _OnClickToken(1)">
+            }
+            @if(characters[0].RemainingTurnsPoisoned > 0)
+            {
+                <img style="z-index: 10;" src="img/tokens/poison.png" alt="@($"cell_{cell.X}_{cell.Y}_token2.png")" class="img-fluid @($"poison-2token{characters.Count}")" @onclick="() => _OnClickToken(1)">
             }
         }
     }
@@ -70,10 +105,17 @@
             return _path;
         }
     }
+    private int Thickness{
+        get{
+            if(cell.Interactive is Obstacle obstacle) return obstacle.Delay;
+            else return 1;
+        }
+    }
     private string interactivePath {
         get{
             string _path = "img/cells/";
-            _path += cell.Interactive?.GetType().Name;
+            if(cell.Interactive?.GetType().Name != "DelayObstacle" && cell.Interactive?.GetType().Name != "PermanentDelayObstacle") _path += cell.Interactive?.GetType().Name;
+            else _path += "water";
             _path += ".png";
             return _path;
         }

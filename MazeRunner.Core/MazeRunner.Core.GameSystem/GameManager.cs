@@ -18,8 +18,9 @@ namespace MazeRunner.Core.GameSystem
         public event PlayerMessage? DefetedToken;
         public event PlayerMessage? DemagedToken;
         public event PlayerMessage? HealedToken;
-        //public event PlayerMessage? TokenEffectAdd;
-        //public event PlayerMessage? TokenEffectSubstract;
+        public event PlayerMessage? MessageToken;
+        public event PlayerMessage? TokenEffectAdd;
+        public event PlayerMessage? TokenEffectSubstract;
         public event PlayerVictory? PlayerWon;
         public event ChangeMaze? ChangeInMazeMade;
         public event ChangeTurn? ChangeInTurnMade;
@@ -130,6 +131,21 @@ namespace MazeRunner.Core.GameSystem
             HealedToken?.Invoke(affectedCharacter, modificaterObject, modificator);
         }
 
+        public void EventStateAddToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
+        {
+            TokenEffectAdd?.Invoke(affectedCharacter, modificaterObject, modificator);
+        }
+
+        public void EventStateSubstractToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
+        {
+            TokenEffectSubstract?.Invoke(affectedCharacter, modificaterObject, modificator);
+        }
+
+        public void EventMessageToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
+        {
+            MessageToken?.Invoke(affectedCharacter, modificaterObject, modificator);
+        }
+
         public void EventPlayerWon(Player player)
         {
             PlayerWon?.Invoke(player);
@@ -143,6 +159,7 @@ namespace MazeRunner.Core.GameSystem
         public void EventPassTurn()
         {
             Turn++;
+            StabilizeEffects();
             ChangeInTurnMade?.Invoke(Turn);
         }
 
@@ -225,11 +242,8 @@ namespace MazeRunner.Core.GameSystem
                             nonPlayable.TargedCharacters.Remove(token);
                         }
                     }
-                    /*foreach(Effect effect in token.ActualEffects)
-                    {
-                        effect.Duration = 0;
-                    }
-                    */
+                    token.CurrentLife = token.MaxLife;
+                    token.ChangeStates(Int32.MinValue, Int32.MinValue, Int32.MinValue);
                 }
                 else
                 {
@@ -256,5 +270,37 @@ namespace MazeRunner.Core.GameSystem
             return 0;
         }
 
+        private void StabilizeEffects()
+        {
+            List<Player> players = new List<Player>();
+            foreach(Player player in ActivePlayers)
+            {
+                players.Add(player);
+            }
+            foreach(Player player in NonActivePlayers)
+            {
+                players.Add(player);
+            }
+            foreach (Player player in players)
+            {
+                foreach (Character token in player.Tokens)
+                {
+                    if(token.RemainingTurnsIced == 1)
+                    {
+                        EventStateSubstractToken(token, null, 1);
+                    }
+                    if(token.RemainingTurnsPoisoned > 0) 
+                    {
+                        token.CurrentLife -= 8;
+                        EventDemagedToken(token, null, 8);
+                    }
+                    if(token.RemainingTurnsPoisoned == 1)
+                    {
+                        EventStateSubstractToken(token, null, 2);
+                    }
+                    token.ChangeStates(0, -1, -1);
+                }
+            }
+        }
     }
 }

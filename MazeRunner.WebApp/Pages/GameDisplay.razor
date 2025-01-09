@@ -159,6 +159,9 @@
         GM.HealedToken += HealedMessage;
         GM.DemagedToken += DemagedMessage;
         GM.PlayerWon += PlayerVictory;
+        GM.MessageToken += Message;
+        GM.TokenEffectAdd += EffectAddMessage;
+        GM.TokenEffectSubstract += EffectSubstractMessage;
         AddText(["El juego ha comenzado."]);
         AddText([$"Turno del jugador {numberOfActualPlayer}, {player.Name}."]);
     }
@@ -302,7 +305,7 @@
 
     private static void Move()
     {
-        if(selectedToken is PlayableCharacter playable && playable.HasMoved == false)
+        if(selectedToken is PlayableCharacter playable && playable.HasMoved == false && playable.RemainingTurnsIced == 0)
         {
             List<(Cell cell, int distance)> cellsWithDistance = MM.GetCellsInRange(GM.maze.Grid[selectedToken.X, selectedToken.Y], selectedToken.Speed);
             List<Cell> cells = new List<Cell>();
@@ -315,7 +318,7 @@
         }
         else
         {
-            message = "El token seleccionado no es jugable o ya se ha movido en este turno.";
+            message = "El token seleccionado no es jugable o no se puede mover en este turno.";
             warningMessageIsActive = true;
         }
     }
@@ -454,6 +457,76 @@
             if (modificaterObject is not null) text += $" debido a {modificaterObject.GetType().Name}.";
             else text += ".";
             AddText([text]);
+        }
+    }
+
+    public static void EffectAddMessage(Character affectedCharacter, Interactive? modificaterObject, int modificator)
+    {
+        string text;
+        if (modificator >= 0 && modificator < 3)
+        {
+            string effect = (modificator == 0)? "Burned" : (modificator == 1)? "Iced" : "Poisoned";
+            text = $"{affectedCharacter.GetType().Name} ha obtenido el efecto {effect}";
+            if (modificaterObject is not null) text += $" debido a {modificaterObject.GetType().Name}.";
+            else text += ".";
+            AddText([text]);
+        }
+        else
+        {
+            text = $"{affectedCharacter.GetType().Name} ha obtenido un nuevo efecto";
+            if (modificaterObject is not null) text += $" debido a {modificaterObject.GetType().Name}.";
+            else text += ".";
+            AddText([text]);
+        }
+    }
+
+    public static void EffectSubstractMessage(Character affectedCharacter, Interactive? modificaterObject, int modificator)
+    {
+        string text;
+        if (modificator >= 0 && modificator < 3)
+        {
+            string effect = (modificator == 0)? "Burned" : (modificator == 1)? "Iced" : "Poisoned";
+            text = $"{affectedCharacter.GetType().Name} ha perdido el efecto {effect}";
+            if (modificaterObject is not null) text += $" gracias a {modificaterObject.GetType().Name}.";
+            else text += ".";
+            AddText([text]);
+        }
+        else
+        {
+            text = $"{affectedCharacter.GetType().Name} ha perdido un efecto";
+            if (modificaterObject is not null) text += $" debido a {modificaterObject.GetType().Name}.";
+            else text += ".";
+            AddText([text]);
+        }
+    }
+
+    public static void Message(Character affectedCharacter, Interactive? modificaterObject, int modificator)
+    {
+        if(modificator == 0 && modificaterObject is not null)
+        {
+            AddText([$"{affectedCharacter.GetType().Name} ha evadido a {modificaterObject.GetType().Name}."]);
+        }
+        else
+        {
+            if(modificaterObject is null)
+            {
+                AddText([$"{affectedCharacter.GetType().Name} ha interactuado con un objeto desconocido"]);
+                return;
+            }
+            switch(modificaterObject.GetType().Name)
+            {
+                case "PrisonTrap":
+                    AddText([$"{affectedCharacter.GetType().Name} ha sido atrapado por {modificaterObject.GetType().Name}."]);
+                    break;
+                case "FireTrap" or "IceTrap" or "PoisonTrap":
+                    string type = (modificaterObject is FireTrap)? "pasos" : "turnos";
+                    string effect = (modificaterObject is FireTrap)? "Burned" : (modificaterObject is IceTrap)? "Iced" : "Poisoned";
+                    AddText([$"{affectedCharacter.GetType().Name} tendrá el efecto {effect} aumentado en {modificator} {type} por {modificaterObject.GetType().Name}."]);
+                    break;
+                default:
+                    AddText([$"{affectedCharacter.GetType().Name} ha interactuado con {modificaterObject.GetType().Name}."]);
+                    break;
+            }
         }
     }
 

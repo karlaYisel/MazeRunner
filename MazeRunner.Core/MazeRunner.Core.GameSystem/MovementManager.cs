@@ -48,17 +48,19 @@ namespace MazeRunner.Core.GameSystem
 
         public void MoveToken(Character token, Cell cell, int distance = 10)
         {
-            int initialLife;
-            //Effects[] initialEffects; //Longitud de Effects.TypeOfEffects enum
+            int initialLife = token.CurrentLife;
+            int initialBurn;
+            int initialIce;
+            int initialPoison;
             Stack<Cell> optimalPath = GetOptimalPath(GM.maze.Grid[token.X, token.Y], cell, distance);
             distance = optimalPath.Count;
             Queue<Cell> path = new Queue<Cell>();
             cell = GM.maze.Grid[token.X, token.Y];
             int delay;
             CleanColor();
-            for (int i = 0; i < distance; i++)
+            for (int i = 0; i < distance; i++) 
             {
-                if (token.ActualState == State.Inactive /*Si contiene tipo congelado no moverte*/) 
+                if (token.ActualState == State.Inactive || token.RemainingTurnsIced > 0) 
                 {
                     CleanColor();
                     return;
@@ -68,37 +70,121 @@ namespace MazeRunner.Core.GameSystem
                 cell = optimalPath.Pop(); 
                 if (cell.Interactive is Obstacle obstacle) delay = obstacle.Delay;
                 else delay = 1;
-                Thread.Sleep(delay*50);
+                Thread.Sleep(delay*100);
                 token.ChangePosition(cell.X, cell.Y);
+                GM.EventChangeInMazeMade();
+                token.CurrentLife -= random.Next(0, 6);
+                GM.StabilizeToken(token);
+                if ((initialLife != token.MaxLife && token.CurrentLife == token.MaxLife) || token.ActualState == State.Inactive) 
+                {
+                    GM.EventDefetedToken(token, null, 0);
+                    CleanColor();
+                    return;
+                }
+                if (initialLife > token.CurrentLife)
+                {
+                    GM.EventDemagedToken(token, null, initialLife - token.CurrentLife);
+                }
+                else if (initialLife < token.CurrentLife)
+                {
+                    GM.EventHealedToken(token, null, token.CurrentLife - initialLife);
+                }
                 GM.EventChangeInMazeMade();
                 if (cell.Interactive is Trap trap && (trap.IsStandTrap == false || optimalPath.Count() == 0)) 
                 {
-                    initialLife = token.CurrentLife;
-                    //initialEffects = ref token.ActualEffects; ???
-                    if (trap.TryToTrigger(token))
+                    switch(trap.GetType().Name)
                     {
-                        GM.StabilizeToken(token);
-                        if ((initialLife != token.MaxLife && token.CurrentLife == token.MaxLife) || token.ActualState == State.Inactive) 
-                        {
-                            GM.EventDefetedToken(token, trap, 0);
-                            CleanColor();
-                            return;
-                        }
-                        if (initialLife > token.CurrentLife)
-                        {
-                            GM.EventDemagedToken(token, trap, initialLife - token.CurrentLife);
-                        }
-                        else if (initialLife < token.CurrentLife)
-                        {
-                            GM.EventHealedToken(token, trap, token.CurrentLife - initialLife);
-                        }
-                        //compara efectos para saber cuales se anaden
-                        //StabilizeEffects(tokens); //Los efectos dan mensaje del dano que hacen, cuales se quitan
-                        GM.EventChangeInMazeMade();
-                    }
-                    else
-                    {
-                        GM.EventDemagedToken(token, trap, 0);
+                        case "PrisonTrap":
+                            if (trap.TryToTrigger(token))
+                            {
+                                GM.EventMessageToken(token, trap, 1);
+                                CleanColor();
+                                CleanMovement(path);
+                                return;
+                            }
+                            else
+                            {
+                                GM.EventMessageToken(token, trap, 0);
+                            }
+                            break;
+                        case "SpikeTrap":
+                            initialLife = token.CurrentLife;
+                            if (trap.TryToTrigger(token))
+                            {
+                                GM.StabilizeToken(token);
+                                if ((initialLife != token.MaxLife && token.CurrentLife == token.MaxLife) || token.ActualState == State.Inactive) 
+                                {
+                                    GM.EventDefetedToken(token, trap, 0);
+                                    CleanColor();
+                                    return;
+                                }
+                                if (initialLife > token.CurrentLife)
+                                {
+                                    GM.EventDemagedToken(token, trap, initialLife - token.CurrentLife);
+                                }
+                                else if (initialLife < token.CurrentLife)
+                                {
+                                    GM.EventHealedToken(token, trap, token.CurrentLife - initialLife);
+                                }
+                                GM.EventChangeInMazeMade();
+                            }
+                            else
+                            {
+                                GM.EventDemagedToken(token, trap, 0);
+                            }
+                            break;
+                        case "FireTrap" or "IceTrap" or "PoisonTrap":
+                            initialLife = token.CurrentLife;
+                            initialBurn = token.RemainingStepsBurned;
+                            initialIce = token.RemainingTurnsIced;
+                            initialPoison = token.RemainingTurnsPoisoned;
+                            if (trap.TryToTrigger(token))
+                            {
+                                GM.StabilizeToken(token);
+                                if ((initialLife != token.MaxLife && token.CurrentLife == token.MaxLife) || token.ActualState == State.Inactive) 
+                                {
+                                    GM.EventDefetedToken(token, trap, 0);
+                                    CleanColor();
+                                    return;
+                                }
+                                if (initialLife > token.CurrentLife)
+                                {
+                                    GM.EventDemagedToken(token, trap, initialLife - token.CurrentLife);
+                                }
+                                else if (initialLife < token.CurrentLife)
+                                {
+                                    GM.EventHealedToken(token, trap, token.CurrentLife - initialLife);
+                                }
+                                if(token.RemainingStepsBurned != initialBurn)
+                                {
+                                    if(initialBurn == 0)
+                                    {
+                                        GM.EventStateAddToken(token, trap, 0);
+                                    }
+                                    GM.EventMessageToken(token, trap, token.RemainingStepsBurned - initialBurn);
+                                }
+                                if(token.RemainingTurnsIced != initialIce)
+                                {
+                                    GM.EventStateAddToken(token, trap, 0);
+                                    GM.EventMessageToken(token, trap, token.RemainingTurnsIced - initialIce);
+                                    CleanColor();
+                                    return;
+                                }
+                                if(token.RemainingTurnsPoisoned != initialPoison)
+                                {
+                                    if(initialPoison == 0)
+                                    {
+                                        GM.EventStateAddToken(token, trap, 0);
+                                    }
+                                    GM.EventMessageToken(token, trap, token.RemainingTurnsPoisoned - initialPoison);
+                                }
+                                GM.EventChangeInMazeMade();
+                            }
+                            else
+                            {
+                                GM.EventDemagedToken(token, trap, 0);
+                            }
+                            break;
                     }
                 }
                 if(GM.EndPoints.Contains(cell))
@@ -111,6 +197,7 @@ namespace MazeRunner.Core.GameSystem
                             {
                                 GM.EventPlayerWon(player);
                                 CleanColor();
+                                CleanMovement(path);
                                 return;
                             }
                         }
@@ -120,6 +207,7 @@ namespace MazeRunner.Core.GameSystem
                             {
                                 GM.EventPlayerWon(player);
                                 CleanColor();
+                                CleanMovement(path);
                                 return;
                             }
                         }
