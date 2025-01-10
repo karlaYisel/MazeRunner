@@ -2,7 +2,7 @@
 
 @page "/GameDisplay"
 
-<PageTitle>MazeRunner</PageTitle>
+<PageTitle>MazeRunner</PageTitle> <!--Considerar hacer el event de cange in maze made para que se vea lindo el movimiento-->
 
 <div class="container center-content" id="page-container">
     <div class="container in-game-menu" id="player-menu">
@@ -151,6 +151,7 @@
         AttackingToken,
         AbilityToken,
         UsingAbilityToken,
+        VisibleTraps,
     }
 
     protected override void OnInitialized()
@@ -289,13 +290,113 @@
                                 AM.CleanTargets();
                             }
                             break;
+                        case "Thief":
+                            Cell trapCell = GM.maze.Grid[X, Y];
+                            if(trapCell.IsColored && selectedToken is Thief thief)
+                            {
+                                AddText([$"{selectedToken.GetType().Name} decide usar su habilidad."]);
+                                if(selectedToken.Equals(token))
+                                {
+                                    thief.ActivateAbility(GM.Turn, MM.GetCellsInRange(trapCell, selectedToken.Speed));
+                                    AddText([$"{selectedToken.GetType().Name} puede ver las trampas cercanas durante 3 segundos."]);
+                                    status = OperationStatus.VisibleTraps;
+                                    MM.CleanColor();
+                                    return;
+                                }
+                                else
+                                {
+                                    AddText([$"{selectedToken.GetType().Name} intecta interactuar con una trampa."]);
+                                    if (trapCell.Interactive is Trap trap)
+                                    {
+                                        if(!thief.ActivateAbility(GM.Turn, trap))
+                                        {
+                                            AddText(["Pero falla."]);
+                                        }
+                                        else
+                                        {
+                                            AddText([$"Y logra {((trap.ActualState == State.Active)? "activar" :"desactivar")} una {trap.GetType().Name}."]);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if(!thief.ActivateAbility(GM.Turn))
+                                        {
+                                            AddText(["Pero falla."]);
+                                        }
+                                        else
+                                        {
+                                            AddText([$"Pero no hay trampas ahí."]);
+                                        }
+                                    }
+                                }
+                            }
+                            MM.CleanColor();
+                            break;
+                        case "Healer":
+                            if(token is not null && token.IsTargeted)
+                            {
+                                int opponentInitialLife = token.CurrentLife;
+                                AddText([$"{selectedToken.GetType().Name} decide usar su habilidad ''Curación'' en {token.GetType().Name}."]);
+                                Thread.Sleep(100);
+                                if(playableAT.ActivateAbility(GM.Turn, token))
+                                {
+                                    AddText(["Y es efectivo."]);
+                                    Thread.Sleep(100);
+                                    GM.StabilizeToken(token);
+                                    if (opponentInitialLife > token.CurrentLife)
+                                    {
+                                        GM.EventDemagedToken(token, selectedToken, opponentInitialLife - token.CurrentLife);
+                                    }
+                                    else if (opponentInitialLife < token.CurrentLife)
+                                    {
+                                        GM.EventHealedToken(token, selectedToken, token.CurrentLife - opponentInitialLife);
+                                    }
+                                    GM.EventChangeInMazeMade();
+                                }
+                                else
+                                {
+                                    AddText(["Pero no es efectivo."]);
+                                    Thread.Sleep(100);
+                                }
+                                AM.CleanTargets();
+                            }
+                            break;
+                        case "Archer":
+                            if(token is not null && token.IsTargeted)
+                            {
+                                int opponentInitialLife = token.CurrentLife;
+                                AddText([$"{selectedToken.GetType().Name} decide usar su habilidad ''Flecha Guiada'' en {token.GetType().Name}."]);
+                                Thread.Sleep(100);
+                                if(playableAT.ActivateAbility(GM.Turn, token))
+                                {
+                                    AddText(["Y es efectivo."]);
+                                    Thread.Sleep(100);
+                                    GM.StabilizeToken(token);
+                                    if (opponentInitialLife > token.CurrentLife)
+                                    {
+                                        GM.EventDemagedToken(token, selectedToken, opponentInitialLife - token.CurrentLife);
+                                    }
+                                    else if (opponentInitialLife < token.CurrentLife)
+                                    {
+                                        GM.EventHealedToken(token, selectedToken, token.CurrentLife - opponentInitialLife);
+                                    }
+                                    GM.EventChangeInMazeMade();
+                                }
+                                else
+                                {
+                                    AddText(["Pero no es efectivo."]);
+                                    Thread.Sleep(100);
+                                }
+                                AM.CleanTargets();
+                            }
+                            break;
                         default:
                             break;
                     }
                     status = OperationStatus.TokenAction;
                 }
                 break;
-            case OperationStatus.TokenAction or OperationStatus.MovingToken or OperationStatus.AttackingToken or OperationStatus.UsingAbilityToken:
+            case OperationStatus.TokenAction or OperationStatus.MovingToken or OperationStatus.AttackingToken or OperationStatus.UsingAbilityToken or OperationStatus.VisibleTraps:
                 break;
             default:
                 if(token is not null) selectedToken = token;
@@ -345,7 +446,80 @@
             switch(playable.GetType().Name)
             {
                 case "Hero":
+                    List<Character> opponentsHero = AM.GetPossibleOpponents(selectedToken);
+                    AM.TargetCharacters(opponentsHero);
+                    status = OperationStatus.AbilityToken;
+                    break;
+                case "Thief":
+                    List<(Cell cell, int distance)> cellsWithDistance = MM.GetCellsInRange(GM.maze.Grid[selectedToken.X, selectedToken.Y], selectedToken.Speed);
+                    List<Cell> cellsThieft = new List<Cell>();
+                    foreach ((Cell cell, int distance) cell in cellsWithDistance)
+                    {
+                        cellsThieft.Add(cell.cell);
+                    }
+                    cellsThieft.Add(GM.maze.Grid[selectedToken.X, selectedToken.Y]);
+                    MM.ColorCells(cellsThieft);
+                    status = OperationStatus.AbilityToken;
+                    break;
+                case "Healer": 
+                    List<Character> friends = AM.GetPossibleFriends(selectedToken);
+                    AM.TargetCharacters(friends);
+                    status = OperationStatus.AbilityToken;
+                    break;
+                case "Paladin":
+                    if(selectedToken is Paladin paladin)
+                    {
+                        AddText([$"{selectedToken.GetType().Name} decide usar su habilidad."]);
+                        if(paladin.ActivateAbility(GM.Turn))
+                        {
+                            AddText([$"{selectedToken.GetType().Name} aumenta su defensa en {paladin.Ability} por los siguientes {paladin.AbilityRecoveryTime} turnos."]);
+                        }
+                    }
+                    break;
+                case "Archer":
+                    Cell initialCell = GM.maze.Grid[selectedToken.X, selectedToken.Y];
                     List<Character> opponents = AM.GetPossibleOpponents(selectedToken);
+                    List<Character> possibleOpponents = new List<Character>();
+                    List<Cell> cells = AM.GetCellsAtDistance(initialCell, 4);
+                    cells.AddRange(AM.GetCellsAtDistance(initialCell, 5));
+                    cells.AddRange(AM.GetCellsAtDistance(initialCell, 6));
+                    cells.AddRange(AM.GetCellsAtDistance(initialCell, 7));
+                    cells.AddRange(AM.GetCellsAtDistance(initialCell, 8));
+                    cells.AddRange(AM.GetCellsAtDistance(initialCell, 9));
+                    cells.AddRange(AM.GetCellsAtDistance(initialCell, 10));
+                    foreach (Cell cell in cells)
+                    {
+                        possibleOpponents.AddRange(GM.GetCharactersInCell(cell));
+                    }
+                    foreach (Character character in possibleOpponents)
+                    {
+                        if (GM.IsCoopGame)
+                        {
+                            switch (numberOfActualPlayer)
+                            {
+                                case 0 or 2:
+                                    if (!GM.ActivePlayers[0].Tokens.Contains(character) && ((GM.ActivePlayers.Count > 2 && !GM.ActivePlayers[2].Tokens.Contains(character)) || (GM.ActivePlayers.Count <= 2 && !GM.NonActivePlayers[2 - GM.ActivePlayers.Count].Tokens.Contains(character))))
+                                    {
+                                        opponents.Add(character);
+                                    }
+                                    break;
+                                case 1 or 3:
+                                    if (!GM.ActivePlayers[1].Tokens.Contains(character) && ((GM.ActivePlayers.Count > 3 && !GM.ActivePlayers[3].Tokens.Contains(character)) || (GM.ActivePlayers.Count <= 3 && !GM.NonActivePlayers[3 - GM.ActivePlayers.Count].Tokens.Contains(character))))
+                                    {
+                                        opponents.Add(character);
+                                    }
+                                    break;
+                                default:
+                                    opponents.Add(character);
+                                    break;
+                            }
+                        }
+                        else if ((!character.Equals(selectedToken) && player == GM.NonActivePlayers[GM.NonActivePlayers.Count - 1]) || !player.Tokens.Contains(character))
+                        {
+                            opponents.Add(character);
+                            continue;
+                        }
+                    }
                     AM.TargetCharacters(opponents);
                     status = OperationStatus.AbilityToken;
                     break;
@@ -374,6 +548,18 @@
                 AM.CleanTargets();
                 status = OperationStatus.ActionSelection;
                 break;
+            case OperationStatus.VisibleTraps:
+                if(selectedToken is not null)
+                {
+                    foreach((Cell cell, int distance) cell in MM.GetCellsInRange(GM.maze.Grid[selectedToken.X, selectedToken.Y], selectedToken.Speed))
+                    {
+                        if(cell.cell.Interactive is Trap trap) trap.ChangeVisibility(false);
+                    }
+                    AddText([$"{selectedToken.GetType().Name} ya no ve las trampas."]);
+                    status = OperationStatus.TokenAction;
+                }
+                else status = OperationStatus.ActionSelection;
+                break;
             default:
                 break;
         }
@@ -393,14 +579,20 @@
         }
         else if(numberOfActualPlayer == 5)
         {
+            List<NPC> NPCs = new List<NPC>();
             foreach (NPC nonPlayable in GM.NonActivePlayers[4 - GM.ActivePlayers.Count].Tokens)
             {
-                NATM.PerformTurn(nonPlayable);
+                NPCs.Add(nonPlayable);
+            }
+            foreach (NPC npc in GM.NonActivePlayers[4 - GM.ActivePlayers.Count].Tokens)
+            {
+                if(npc.ActualState == State.Active) NATM.PerformTurn(npc);
             }
             MM.CleanColor();
             AM.CleanTargets();
             numberOfActualPlayer = 1;
             GM.EventPassTurn();
+            AddText([$"Turno del jugador {numberOfActualPlayer}, {player.Name}."]);
             status = OperationStatus.ActionSelection;
         }
         else if(GM.PlayWithBots)

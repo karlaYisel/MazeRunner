@@ -3,6 +3,10 @@ namespace MazeRunner.Core.InteractiveObjects
     public enum TypeOfPlayableCharacter
     {
         Hero,
+        Thief,
+        Healer,
+        Paladin,
+        Archer,
     }
 
     public enum TypeOfAttack

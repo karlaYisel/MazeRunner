@@ -70,26 +70,30 @@ namespace MazeRunner.Core.GameSystem
                 cell = optimalPath.Pop(); 
                 if (cell.Interactive is Obstacle obstacle) delay = obstacle.Delay;
                 else delay = 1;
-                Thread.Sleep(delay*100);
+                Thread.Sleep(delay*200);
                 token.ChangePosition(cell.X, cell.Y);
                 GM.EventChangeInMazeMade();
-                token.CurrentLife -= random.Next(0, 6);
-                GM.StabilizeToken(token);
-                if ((initialLife != token.MaxLife && token.CurrentLife == token.MaxLife) || token.ActualState == State.Inactive) 
+                if(token.RemainingStepsBurned > 0)
                 {
-                    GM.EventDefetedToken(token, null, 0);
-                    CleanColor();
-                    return;
+                    token.CurrentLife -= random.Next(0, 6);
+                    token.ChangeStates(-1, 0, 0);
+                    GM.StabilizeToken(token);
+                    if ((initialLife != token.MaxLife && token.CurrentLife == token.MaxLife) || token.ActualState == State.Inactive) 
+                    {
+                        GM.EventDefetedToken(token, null, 0);
+                        CleanColor();
+                        return;
+                    }
+                    if (initialLife > token.CurrentLife)
+                    {
+                        GM.EventDemagedToken(token, null, initialLife - token.CurrentLife);
+                    }
+                    else if (initialLife < token.CurrentLife)
+                    {
+                        GM.EventHealedToken(token, null, token.CurrentLife - initialLife);
+                    }
+                    GM.EventChangeInMazeMade();
                 }
-                if (initialLife > token.CurrentLife)
-                {
-                    GM.EventDemagedToken(token, null, initialLife - token.CurrentLife);
-                }
-                else if (initialLife < token.CurrentLife)
-                {
-                    GM.EventHealedToken(token, null, token.CurrentLife - initialLife);
-                }
-                GM.EventChangeInMazeMade();
                 if (cell.Interactive is Trap trap && (trap.IsStandTrap == false || optimalPath.Count() == 0)) 
                 {
                     switch(trap.GetType().Name)

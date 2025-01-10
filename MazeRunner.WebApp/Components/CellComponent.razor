@@ -1,6 +1,17 @@
 <div class="cell-box center-content">
     <img style="z-index: 1;" src="@path" alt="@($"cell_{cell.X}_{cell.Y}.png")" class="img-fluid cell-image" @onclick="_OnClick">
-    @if(cell.Interactive is not null && cell.Interactive.ActualState == State.Active)
+    @if(cell.Interactive is Trap trap)
+    {
+        @if(trap.IsVisible)
+        {
+            <img style="z-index: 2;" src="@interactivePath" alt="@($"cell_{cell.X}_{cell.Y}.png")" class="img-fluid cell-image" @onclick="_OnClick">
+            @if(trap.ActualState == State.Inactive)
+            {
+                <img style="z-index: 3;" src="img/cells/inactive.png" alt="@($"cell_{cell.X}_{cell.Y}.png")" class="img-fluid cell-image" @onclick="_OnClick">
+            }
+        }
+    }
+    else if(cell.Interactive is not null && cell.Interactive.ActualState == State.Active)
     {
         <img style="z-index: 2;" src="@interactivePath" alt="@($"cell_{cell.X}_{cell.Y}.png")" class="img-fluid cell-image" @onclick="_OnClick">
         @if(Thickness < 5)

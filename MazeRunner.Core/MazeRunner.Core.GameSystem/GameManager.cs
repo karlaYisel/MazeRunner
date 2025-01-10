@@ -248,7 +248,6 @@ namespace MazeRunner.Core.GameSystem
                 else
                 {
                     token.ChangeState();
-                    GM.NonActivePlayers[GM.NonActivePlayers.Count - 1].Tokens.Remove(token);
                 }
                 EventDefetedToken(token, null, 0);
             }

@@ -14,6 +14,12 @@ namespace MazeRunner.Core.InteractiveObjects
         //IsStandTrap == true if the trap only get trigged when the player stand over it
         //IsStandTrap == false if get trigged when the player walks over it
         public bool IsStandTrap { get; protected set; }
+        public bool IsVisible { get; protected set; } = false;
+
+        public void ChangeVisibility(bool visibility)
+        {
+            IsVisible = visibility;
+        }
 
         public bool TryToTrigger(Character character)
         {

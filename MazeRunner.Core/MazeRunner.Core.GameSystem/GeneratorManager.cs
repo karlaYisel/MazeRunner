@@ -147,6 +147,10 @@ namespace MazeRunner.Core.GameSystem
                 if (!GM.maze.IsOfThisMaze(startCell)) return false;
                 playable.ChangePosition(startCell.X, startCell.Y);
                 GM.ChangeInTurnMade += token.NewTurn;
+                if (token is Paladin paladin)
+                {
+                    GM.ChangeInTurnMade += paladin.CheckAbility;
+                }
             }
             return true;
         }
@@ -189,6 +193,18 @@ namespace MazeRunner.Core.GameSystem
                         break;
                     case "Hero":
                         parameter = [0, 0, random.Next(60, 101), random.Next(5, 9), random.Next(5, 9), random.Next(5, 9), random.Next(2, 6), random.Next(1, 4)];
+                        break;
+                    case "Thief":
+                        parameter = [0, 0, random.Next(40, 61), random.Next(5, 7), random.Next(5, 7), random.Next(5, 11), random.Next(2, 6), random.Next(1, 4)];
+                        break;
+                    case "Healer": 
+                        parameter = [0, 0, random.Next(60, 81), random.Next(5, 7), random.Next(5, 7), random.Next(5, 9), random.Next(2, 5), random.Next(1, 4)];
+                        break;
+                    case "Paladin":
+                        parameter = [0, 0, random.Next(70, 101), random.Next(5, 9), random.Next(5, 9), random.Next(5, 7), random.Next(2, 4), random.Next(1, 4)];
+                        break;
+                    case "Archer":
+                        parameter = [0, 0, random.Next(60, 101), random.Next(5, 8), random.Next(5, 8), random.Next(5, 9), random.Next(2, 6), random.Next(1, 4)];
                         break;
                     default:
                         break;

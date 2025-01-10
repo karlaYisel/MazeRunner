@@ -34,8 +34,9 @@ namespace MazeRunner.Core.GameSystem
         }
 
 //Non Active Turn token's methods
-        public void PerformTurn(NPC nonPlayable)
+        public void PerformTurn(NPC nonPlayable) //Improve this
         {
+            if(nonPlayable.RemainingTurnsIced > 0 || nonPlayable.ActualState == State.Inactive) return;
             Cell initialCell = GM.maze.Grid[nonPlayable.X, nonPlayable.Y];
             List<(Cell cell, int distance)> cells = MM.GetCellsInRange(initialCell, nonPlayable.Speed);
             if (cells.Count == 0) return;
@@ -44,7 +45,6 @@ namespace MazeRunner.Core.GameSystem
             int delay;
             List<Character> opponents;
             int initialLife;
-            //Effects[] initialEffects; //Longitud de Effects.TypeOfEffects enum
             switch (nonPlayable.TypeNPC)
             {
                 case TypeOfNPC.Neutral:
@@ -72,8 +72,12 @@ namespace MazeRunner.Core.GameSystem
                                     continue;
                                 }
                                 MM.MoveToken(nonPlayable, cell, delay);
+                                if(!cell.Equals(GM.maze.Grid[nonPlayable.X, nonPlayable.Y]) || nonPlayable.ActualState == State.Inactive) 
+                                {
+                                    GM.EventChangeInMazeMade();
+                                    return;
+                                }
                                 initialLife = character.CurrentLife;
-                                //initialEffects = ref character.ActualEffects; ???
                                 nonPlayable.Attack(character);
                                 GM.StabilizeToken(character);
                                 if ((initialLife != character.MaxLife && character.CurrentLife == character.MaxLife) || character.ActualState == State.Inactive) 
@@ -89,8 +93,6 @@ namespace MazeRunner.Core.GameSystem
                                 {
                                     GM.EventHealedToken(character, nonPlayable, character.CurrentLife - initialLife);
                                 }
-                                //compara efectos para saber cuales se anaden
-                                //StabilizeEffects(tokens); //Los efectos dan mensaje del dano que hacen, cuales se quitan
                                 GM.EventChangeInMazeMade();
                                 return;
                             }
@@ -102,7 +104,6 @@ namespace MazeRunner.Core.GameSystem
                         if(nonPlayable.TargedCharacters is not null && nonPlayable.TargedCharacters.Contains(character)) 
                         {
                             initialLife = character.CurrentLife;
-                            //initialEffects = ref character.ActualEffects; ???
                             nonPlayable.Attack(character);
                             GM.StabilizeToken(character);
                             if ((initialLife != character.MaxLife && character.CurrentLife == character.MaxLife) || character.ActualState == State.Inactive) 
@@ -118,8 +119,6 @@ namespace MazeRunner.Core.GameSystem
                             {
                                 GM.EventHealedToken(character, nonPlayable, character.CurrentLife - initialLife);
                             }
-                            //compara efectos para saber cuales se anaden
-                            //StabilizeEffects(tokens); //Los efectos dan mensaje del dano que hacen, cuales se quitan
                             GM.EventChangeInMazeMade();
                             MM.MakeRandomMove(nonPlayable);
                             return;
@@ -149,8 +148,12 @@ namespace MazeRunner.Core.GameSystem
                                 continue;
                             }
                             MM.MoveToken(nonPlayable, cell, delay);
+                            if(!cell.Equals(GM.maze.Grid[nonPlayable.X, nonPlayable.Y]) || nonPlayable.ActualState == State.Inactive) 
+                            {
+                                GM.EventChangeInMazeMade();
+                                return;
+                            }
                             initialLife = character.CurrentLife;
-                            //initialEffects = ref character.ActualEffects; ???
                             nonPlayable.Attack(character);
                             GM.StabilizeToken(character);
                             if ((initialLife != character.MaxLife && character.CurrentLife == character.MaxLife) || character.ActualState == State.Inactive) 
@@ -166,8 +169,6 @@ namespace MazeRunner.Core.GameSystem
                             {
                                 GM.EventHealedToken(character, nonPlayable, character.CurrentLife - initialLife);
                             }
-                            //compara efectos para saber cuales se anaden
-                            //StabilizeEffects(tokens); //Los efectos dan mensaje del dano que hacen, cuales se quitan
                             GM.EventChangeInMazeMade();
                             return;
                         }
@@ -176,7 +177,6 @@ namespace MazeRunner.Core.GameSystem
                     foreach (Character character in opponents)
                     {
                         initialLife = character.CurrentLife;
-                        //initialEffects = ref character.ActualEffects; ???
                         nonPlayable.Attack(character);
                         GM.StabilizeToken(character);
                         if ((initialLife != character.MaxLife && character.CurrentLife == character.MaxLife) || character.ActualState == State.Inactive) 
@@ -192,8 +192,6 @@ namespace MazeRunner.Core.GameSystem
                         {
                             GM.EventHealedToken(character, nonPlayable, character.CurrentLife - initialLife);
                         }
-                        //compara efectos para saber cuales se anaden
-                        //StabilizeEffects(tokens); //Los efectos dan mensaje del dano que hacen, cuales se quitan
                         GM.EventChangeInMazeMade();
                         MM.MakeRandomMove(nonPlayable);
                         return;
@@ -218,9 +216,13 @@ namespace MazeRunner.Core.GameSystem
                                 if (cells.Contains((neighbor, cellWithDistance.distance - delay)))
                                 {
                                     MM.MoveToken(nonPlayable, neighbor, cellWithDistance.distance - delay);
+                                    if(!neighbor.Equals(GM.maze.Grid[nonPlayable.X, nonPlayable.Y]) || nonPlayable.ActualState == State.Inactive) 
+                                    {
+                                        GM.EventChangeInMazeMade();
+                                        return;
+                                    }
                                     Character character = opponents[random.Next(0, opponents.Count)];
                                     initialLife = character.CurrentLife;
-                                    //initialEffects = ref character.ActualEffects; ???
                                     nonPlayable.Attack(character);
                                     GM.StabilizeToken(character);
                                     if ((initialLife != character.MaxLife && character.CurrentLife == character.MaxLife) || character.ActualState == State.Inactive) 
@@ -236,8 +238,6 @@ namespace MazeRunner.Core.GameSystem
                                     {
                                         GM.EventHealedToken(character, nonPlayable, character.CurrentLife - initialLife);
                                     }
-                                    //compara efectos para saber cuales se anaden
-                                    //StabilizeEffects(tokens); //Los efectos dan mensaje del dano que hacen, cuales se quitan
                                     GM.EventChangeInMazeMade();
                                     return;
                                 }
