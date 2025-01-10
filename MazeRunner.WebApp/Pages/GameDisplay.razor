@@ -119,7 +119,7 @@
                 }
                 _message += " han ganado el juego";
             }
-            else _message += $"El jugador {winners[0].GetType().Name} ha ganado el juego.";
+            else _message += $"El jugador {winners[0].Name} ha ganado el juego.";
             return _message;
         }
     }
@@ -213,7 +213,7 @@
                     }
                     else
                     {
-                        message = $"Debe seleccionar un token perteneciente a su jugador.</br>Colores:</br>Jugador 1 - {GM.colors[0]}</br>Jugador 2 - {GM.colors[1]}</br>Jugador 3 - {GM.colors[2]}</br>Jugador 4 - {GM.colors[3]}</br>NPC - {GM.colors[4]}";
+                        message = $"Debe seleccionar un token perteneciente a su jugador.<br />Colores:<br />Jugador 1 - {GM.colors[0]}<br />Jugador 2 - {GM.colors[1]}<br />Jugador 3 - {GM.colors[2]}<br />Jugador 4 - {GM.colors[3]}<br />NPC - {GM.colors[4]}";
                         warningMessageIsActive = true;
                     }
                 }
