@@ -35,8 +35,9 @@ namespace MazeRunner.Core.InteractiveObjects
             return true;
         }
 
-        public void CheckAbility(int turn)
+        public async Task CheckAbility(int turn)
         {
+            await Task.Delay(100);
             if(LastTurnUsingAbility != 0 && LastTurnUsingAbility - AbilityRecoveryTime == turn) 
             {
                 this.Defense -= (this.Ability);

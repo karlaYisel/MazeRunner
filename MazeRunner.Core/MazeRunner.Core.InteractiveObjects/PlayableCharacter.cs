@@ -36,8 +36,9 @@ namespace MazeRunner.Core.InteractiveObjects
             return false;
         }
 
-        public void NewTurn(int turn)
+        public async Task NewTurn(int turn)
         {
+            await Task.Delay(100);
             if(turn > 0)
             {
                 HasMoved = false;

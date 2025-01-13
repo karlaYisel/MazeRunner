@@ -11,8 +11,9 @@ namespace MazeRunner.Core.InteractiveObjects
             this.Lapse = Lapse;
         }
 
-        public void StabilizeWall(int turn)
+        public async Task StabilizeWall(int turn)
         {
+            await Task.Delay(100);
             turn %= 2*Delay;
             if (turn < 0) turn += 2*Delay;
             if ((turn < Delay && ActualState != State.Inactive) || (turn >= Delay && ActualState != State.Active)) ChangeState();

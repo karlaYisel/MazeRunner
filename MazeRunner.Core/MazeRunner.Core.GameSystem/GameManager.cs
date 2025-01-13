@@ -3,10 +3,10 @@ using MazeRunner.Core.MazeGenerator;
 
 namespace MazeRunner.Core.GameSystem
 {
-    public delegate void PlayerMessage(Character affectedCharacter, Interactive? modificaterObject, int modificator);
-    public delegate void PlayerVictory(Player player);
-    public delegate void ChangeTurn(int turn);
-    public delegate void ChangeMaze();
+    public delegate Task PlayerMessage(Character affectedCharacter, Interactive? modificaterObject, int modificator);
+    public delegate Task PlayerVictory(Player player);
+    public delegate Task ChangeTurn(int turn);
+    public delegate Task ChangeMaze();
 
     public class GameManager
     {
@@ -116,50 +116,51 @@ namespace MazeRunner.Core.GameSystem
         }
 
 //Events Manager
-        public void EventDefetedToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
+        public async Task EventDefetedToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
         {
-            DefetedToken?.Invoke(affectedCharacter, modificaterObject, modificator);
+            if(DefetedToken != null) await DefetedToken.Invoke(affectedCharacter, modificaterObject, modificator);
         }
 
-        public void EventDemagedToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
+        public async Task EventDemagedToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
         {
-            DemagedToken?.Invoke(affectedCharacter, modificaterObject, modificator);
+            if(DemagedToken != null) await DemagedToken.Invoke(affectedCharacter, modificaterObject, modificator);
         }
 
-        public void EventHealedToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
+        public async Task EventHealedToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
         {
-            HealedToken?.Invoke(affectedCharacter, modificaterObject, modificator);
+            if(HealedToken != null) await HealedToken.Invoke(affectedCharacter, modificaterObject, modificator);
         }
 
-        public void EventStateAddToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
+        public async Task EventStateAddToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
         {
-            TokenEffectAdd?.Invoke(affectedCharacter, modificaterObject, modificator);
+            if(TokenEffectAdd != null) await TokenEffectAdd.Invoke(affectedCharacter, modificaterObject, modificator);
         }
 
-        public void EventStateSubstractToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
+        public async Task EventStateSubstractToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
         {
-            TokenEffectSubstract?.Invoke(affectedCharacter, modificaterObject, modificator);
+            if(TokenEffectSubstract != null) await TokenEffectSubstract.Invoke(affectedCharacter, modificaterObject, modificator);
         }
 
-        public void EventMessageToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
+        public async Task EventMessageToken(Character affectedCharacter, Interactive? modificaterObject, int modificator)
         {
-            MessageToken?.Invoke(affectedCharacter, modificaterObject, modificator);
+            if(MessageToken != null) await MessageToken.Invoke(affectedCharacter, modificaterObject, modificator);
         }
 
-        public void EventPlayerWon(Player player)
+        public async Task EventPlayerWon(Player player)
         {
-            PlayerWon?.Invoke(player);
+            if(PlayerWon != null) await PlayerWon.Invoke(player);
         }
 
-        public void EventChangeInMazeMade()
+        public async Task EventChangeInMazeMade()
         {
-            ChangeInMazeMade?.Invoke();
+            if(ChangeInMazeMade != null) await ChangeInMazeMade.Invoke();
         }
 
-        public void EventPassTurn()
+        public async Task EventPassTurn()
         {
+            await Task.Delay(100);
             Turn++;
-            StabilizeEffects();
+            await StabilizeEffects();
             ChangeInTurnMade?.Invoke(Turn);
         }
 
@@ -221,7 +222,7 @@ namespace MazeRunner.Core.GameSystem
             return startCell;
         }
 
-        public void StabilizeToken(Character token)
+        public async Task StabilizeToken(Character token)
         {
             if (token.CurrentLife > token.MaxLife) 
             {
@@ -249,7 +250,7 @@ namespace MazeRunner.Core.GameSystem
                 {
                     token.ChangeState();
                 }
-                EventDefetedToken(token, null, 0);
+                await EventDefetedToken(token, null, 0);
             }
         }
 
@@ -269,7 +270,7 @@ namespace MazeRunner.Core.GameSystem
             return 0;
         }
 
-        private void StabilizeEffects()
+        private async Task StabilizeEffects()
         {
             List<Player> players = new List<Player>();
             foreach(Player player in ActivePlayers)
@@ -286,16 +287,16 @@ namespace MazeRunner.Core.GameSystem
                 {
                     if(token.RemainingTurnsIced == 1)
                     {
-                        EventStateSubstractToken(token, null, 1);
+                        await EventStateSubstractToken(token, null, 1);
                     }
                     if(token.RemainingTurnsPoisoned > 0) 
                     {
                         token.CurrentLife -= 8;
-                        EventDemagedToken(token, null, 8);
+                        await EventDemagedToken(token, null, 8);
                     }
                     if(token.RemainingTurnsPoisoned == 1)
                     {
-                        EventStateSubstractToken(token, null, 2);
+                        await EventStateSubstractToken(token, null, 2);
                     }
                     token.ChangeStates(0, -1, -1);
                 }

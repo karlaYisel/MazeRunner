@@ -32,7 +32,7 @@ namespace MazeRunner.Core.GameSystem
         }
 
 //Movement's methods
-        public void MakeRandomMove (Character token)
+        public async Task MakeRandomMove (Character token)
         {
             List<(Cell cell, int distance)> cells = GetCellsInRange(GM.maze.Grid[token.X, token.Y], token.Speed);
             if (random.Next(0, cells.Count + 1) == 0)
@@ -42,11 +42,11 @@ namespace MazeRunner.Core.GameSystem
             else
             {
                 (Cell cell, int distance) cellWithDistance = cells[random.Next(0, cells.Count)];
-                MoveToken(token, cellWithDistance.cell, cellWithDistance.distance);
+                await MoveToken(token, cellWithDistance.cell, cellWithDistance.distance);
             }
         }
 
-        public void MoveToken(Character token, Cell cell, int distance = 10)
+        public async Task MoveToken(Character token, Cell cell, int distance = 10)
         {
             int initialLife = token.CurrentLife;
             int initialBurn;
@@ -57,42 +57,42 @@ namespace MazeRunner.Core.GameSystem
             Queue<Cell> path = new Queue<Cell>();
             cell = GM.maze.Grid[token.X, token.Y];
             int delay;
-            CleanColor();
+            await CleanColor();
             for (int i = 0; i < distance; i++) 
             {
                 if (token.ActualState == State.Inactive || token.RemainingTurnsIced > 0) 
                 {
-                    CleanColor();
+                    await CleanColor();
                     return;
                 }
-                ColorCells([cell]);
+                await ColorCells([cell]);
                 path.Enqueue(cell);
                 cell = optimalPath.Pop(); 
-                if (cell.Interactive is Obstacle obstacle) delay = obstacle.Delay;
+                if (cell.Interactive is Obstacle obstacle && obstacle.ActualState == State.Active) delay = obstacle.Delay;
                 else delay = 1;
-                Thread.Sleep(delay*200);
+                await Task.Delay(delay*200);
                 token.ChangePosition(cell.X, cell.Y);
-                GM.EventChangeInMazeMade();
+                await GM.EventChangeInMazeMade();
                 if(token.RemainingStepsBurned > 0)
                 {
                     token.CurrentLife -= random.Next(0, 6);
                     token.ChangeStates(-1, 0, 0);
-                    GM.StabilizeToken(token);
+                    await GM.StabilizeToken(token);
                     if ((initialLife != token.MaxLife && token.CurrentLife == token.MaxLife) || token.ActualState == State.Inactive) 
                     {
-                        GM.EventDefetedToken(token, null, 0);
-                        CleanColor();
+                        await GM.EventDefetedToken(token, null, 0);
+                        await CleanColor();
                         return;
                     }
                     if (initialLife > token.CurrentLife)
                     {
-                        GM.EventDemagedToken(token, null, initialLife - token.CurrentLife);
+                        await GM.EventDemagedToken(token, null, initialLife - token.CurrentLife);
                     }
                     else if (initialLife < token.CurrentLife)
                     {
-                        GM.EventHealedToken(token, null, token.CurrentLife - initialLife);
+                        await GM.EventHealedToken(token, null, token.CurrentLife - initialLife);
                     }
-                    GM.EventChangeInMazeMade();
+                    await GM.EventChangeInMazeMade();
                 }
                 if (cell.Interactive is Trap trap && (trap.IsStandTrap == false || optimalPath.Count() == 0)) 
                 {
@@ -101,40 +101,40 @@ namespace MazeRunner.Core.GameSystem
                         case "PrisonTrap":
                             if (trap.TryToTrigger(token))
                             {
-                                GM.EventMessageToken(token, trap, 1);
-                                CleanColor();
-                                CleanMovement(path);
+                                await GM.EventMessageToken(token, trap, 1);
+                                await CleanColor();
+                                await CleanMovement(path);
                                 return;
                             }
                             else
                             {
-                                GM.EventMessageToken(token, trap, 0);
+                                await GM.EventMessageToken(token, trap, 0);
                             }
                             break;
                         case "SpikeTrap":
                             initialLife = token.CurrentLife;
                             if (trap.TryToTrigger(token))
                             {
-                                GM.StabilizeToken(token);
+                                await GM.StabilizeToken(token);
                                 if ((initialLife != token.MaxLife && token.CurrentLife == token.MaxLife) || token.ActualState == State.Inactive) 
                                 {
-                                    GM.EventDefetedToken(token, trap, 0);
-                                    CleanColor();
+                                    await GM.EventDefetedToken(token, trap, 0);
+                                    await CleanColor();
                                     return;
                                 }
                                 if (initialLife > token.CurrentLife)
                                 {
-                                    GM.EventDemagedToken(token, trap, initialLife - token.CurrentLife);
+                                    await GM.EventDemagedToken(token, trap, initialLife - token.CurrentLife);
                                 }
                                 else if (initialLife < token.CurrentLife)
                                 {
-                                    GM.EventHealedToken(token, trap, token.CurrentLife - initialLife);
+                                    await GM.EventHealedToken(token, trap, token.CurrentLife - initialLife);
                                 }
-                                GM.EventChangeInMazeMade();
+                                await GM.EventChangeInMazeMade();
                             }
                             else
                             {
-                                GM.EventDemagedToken(token, trap, 0);
+                                await GM.EventDemagedToken(token, trap, 0);
                             }
                             break;
                         case "FireTrap" or "IceTrap" or "PoisonTrap":
@@ -144,49 +144,49 @@ namespace MazeRunner.Core.GameSystem
                             initialPoison = token.RemainingTurnsPoisoned;
                             if (trap.TryToTrigger(token))
                             {
-                                GM.StabilizeToken(token);
+                                await GM.StabilizeToken(token);
                                 if ((initialLife != token.MaxLife && token.CurrentLife == token.MaxLife) || token.ActualState == State.Inactive) 
                                 {
-                                    GM.EventDefetedToken(token, trap, 0);
-                                    CleanColor();
+                                    await GM.EventDefetedToken(token, trap, 0);
+                                    await CleanColor();
                                     return;
                                 }
                                 if (initialLife > token.CurrentLife)
                                 {
-                                    GM.EventDemagedToken(token, trap, initialLife - token.CurrentLife);
+                                    await GM.EventDemagedToken(token, trap, initialLife - token.CurrentLife);
                                 }
                                 else if (initialLife < token.CurrentLife)
                                 {
-                                    GM.EventHealedToken(token, trap, token.CurrentLife - initialLife);
+                                    await GM.EventHealedToken(token, trap, token.CurrentLife - initialLife);
                                 }
                                 if(token.RemainingStepsBurned != initialBurn)
                                 {
                                     if(initialBurn == 0)
                                     {
-                                        GM.EventStateAddToken(token, trap, 0);
+                                        await GM.EventStateAddToken(token, trap, 0);
                                     }
-                                    GM.EventMessageToken(token, trap, token.RemainingStepsBurned - initialBurn);
+                                    await GM.EventMessageToken(token, trap, token.RemainingStepsBurned - initialBurn);
                                 }
                                 if(token.RemainingTurnsIced != initialIce)
                                 {
-                                    GM.EventStateAddToken(token, trap, 0);
-                                    GM.EventMessageToken(token, trap, token.RemainingTurnsIced - initialIce);
-                                    CleanColor();
+                                    await GM.EventStateAddToken(token, trap, 0);
+                                    await GM.EventMessageToken(token, trap, token.RemainingTurnsIced - initialIce);
+                                    await CleanColor();
                                     return;
                                 }
                                 if(token.RemainingTurnsPoisoned != initialPoison)
                                 {
                                     if(initialPoison == 0)
                                     {
-                                        GM.EventStateAddToken(token, trap, 0);
+                                        await GM.EventStateAddToken(token, trap, 0);
                                     }
-                                    GM.EventMessageToken(token, trap, token.RemainingTurnsPoisoned - initialPoison);
+                                    await GM.EventMessageToken(token, trap, token.RemainingTurnsPoisoned - initialPoison);
                                 }
-                                GM.EventChangeInMazeMade();
+                                await GM.EventChangeInMazeMade();
                             }
                             else
                             {
-                                GM.EventDemagedToken(token, trap, 0);
+                                await GM.EventDemagedToken(token, trap, 0);
                             }
                             break;
                     }
@@ -199,9 +199,9 @@ namespace MazeRunner.Core.GameSystem
                         {
                             if(player.Tokens.Contains(token)) 
                             {
-                                GM.EventPlayerWon(player);
-                                CleanColor();
-                                CleanMovement(path);
+                                await GM.EventPlayerWon(player);
+                                await CleanColor();
+                                await CleanMovement(path);
                                 return;
                             }
                         }
@@ -209,16 +209,16 @@ namespace MazeRunner.Core.GameSystem
                         {
                             if(player.Tokens.Contains(token)) 
                             {
-                                GM.EventPlayerWon(player);
-                                CleanColor();
-                                CleanMovement(path);
+                                await GM.EventPlayerWon(player);
+                                await CleanColor();
+                                await CleanMovement(path);
                                 return;
                             }
                         }
                     }
                 }
             }
-            CleanMovement(path);
+            await CleanMovement(path);
         }
 
         public Stack<Cell> GetOptimalPath(Cell cell, Cell destiny, int distance = 10)
@@ -332,16 +332,16 @@ namespace MazeRunner.Core.GameSystem
             return cells;
         }
 
-        public void ColorCells(List<Cell> cells)
+        public async Task ColorCells(List<Cell> cells)
         {
             foreach (Cell cell in cells)
             {
                 if (cell.IsColored == false) cell.ChangeColorStatus();
             }
-            GM.EventChangeInMazeMade();
+            await GM.EventChangeInMazeMade();
         }
 
-        public void CleanColor()
+        public async Task CleanColor()
         {
             Cell cell;
             for (int x = 0; x < GM.maze.Width; x++)
@@ -352,10 +352,10 @@ namespace MazeRunner.Core.GameSystem
                     if (cell.IsColored == true) cell.ChangeColorStatus();
                 }
             }
-            GM.EventChangeInMazeMade();
+            await GM.EventChangeInMazeMade();
         }
 
-        private void CleanMovement(Queue<Cell> path)
+        private async Task CleanMovement(Queue<Cell> path)
         {
             Cell cell;
             for (int i = 0; i < path.Count; i++)
@@ -363,7 +363,7 @@ namespace MazeRunner.Core.GameSystem
                 Thread.Sleep(50);
                 cell = path.Dequeue();
                 if (cell.IsColored == true) cell.ChangeColorStatus();
-                GM.EventChangeInMazeMade();
+                await GM.EventChangeInMazeMade();
             }
         }
     }

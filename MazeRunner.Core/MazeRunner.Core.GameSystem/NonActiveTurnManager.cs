@@ -34,7 +34,7 @@ namespace MazeRunner.Core.GameSystem
         }
 
 //Non Active Turn token's methods
-        public void PerformTurn(NPC nonPlayable) //Improve this
+        public async Task PerformTurn(NPC nonPlayable) //Improve this
         {
             if(nonPlayable.RemainingTurnsIced > 0 || nonPlayable.ActualState == State.Inactive) return;
             Cell initialCell = GM.maze.Grid[nonPlayable.X, nonPlayable.Y];
@@ -47,6 +47,9 @@ namespace MazeRunner.Core.GameSystem
             int initialLife;
             switch (nonPlayable.TypeNPC)
             {
+                case TypeOfNPC.Passive:
+                    await MM.MakeRandomMove(nonPlayable);
+                    break;
                 case TypeOfNPC.Neutral:
                     opponents = GM.GetCharactersInCell(initialCell);
                     opponents.Remove(nonPlayable);
@@ -71,29 +74,28 @@ namespace MazeRunner.Core.GameSystem
                                     neighbors.Remove(cell);
                                     continue;
                                 }
-                                MM.MoveToken(nonPlayable, cell, delay);
+                                await MM.MoveToken(nonPlayable, cell, delay);
                                 if(!cell.Equals(GM.maze.Grid[nonPlayable.X, nonPlayable.Y]) || nonPlayable.ActualState == State.Inactive) 
                                 {
-                                    GM.EventChangeInMazeMade();
+                                    await GM.EventChangeInMazeMade();
                                     return;
                                 }
                                 initialLife = character.CurrentLife;
                                 nonPlayable.Attack(character);
-                                GM.StabilizeToken(character);
+                                await GM.StabilizeToken(character);
                                 if ((initialLife != character.MaxLife && character.CurrentLife == character.MaxLife) || character.ActualState == State.Inactive) 
                                 {
-                                    GM.EventDefetedToken(character, nonPlayable, 0);
-                                    return;
+                                    await GM.EventDefetedToken(character, nonPlayable, 0);
                                 }
                                 if (initialLife > character.CurrentLife)
                                 {
-                                    GM.EventDemagedToken(character, nonPlayable, initialLife - character.CurrentLife);
+                                    await GM.EventDemagedToken(character, nonPlayable, initialLife - character.CurrentLife);
                                 }
                                 else if (initialLife < character.CurrentLife)
                                 {
-                                    GM.EventHealedToken(character, nonPlayable, character.CurrentLife - initialLife);
+                                    await GM.EventHealedToken(character, nonPlayable, character.CurrentLife - initialLife);
                                 }
-                                GM.EventChangeInMazeMade();
+                                await GM.EventChangeInMazeMade();
                                 return;
                             }
                         }
@@ -105,25 +107,26 @@ namespace MazeRunner.Core.GameSystem
                         {
                             initialLife = character.CurrentLife;
                             nonPlayable.Attack(character);
-                            GM.StabilizeToken(character);
+                            await GM.StabilizeToken(character);
                             if ((initialLife != character.MaxLife && character.CurrentLife == character.MaxLife) || character.ActualState == State.Inactive) 
                             {
-                                GM.EventDefetedToken(character, nonPlayable, 0);
+                                await GM.EventDefetedToken(character, nonPlayable, 0);
                                 return;
                             }
                             if (initialLife > character.CurrentLife)
                             {
-                                GM.EventDemagedToken(character, nonPlayable, initialLife - character.CurrentLife);
+                                await GM.EventDemagedToken(character, nonPlayable, initialLife - character.CurrentLife);
                             }
                             else if (initialLife < character.CurrentLife)
                             {
-                                GM.EventHealedToken(character, nonPlayable, character.CurrentLife - initialLife);
+                                await GM.EventHealedToken(character, nonPlayable, character.CurrentLife - initialLife);
                             }
-                            GM.EventChangeInMazeMade();
-                            MM.MakeRandomMove(nonPlayable);
+                            await GM.EventChangeInMazeMade();
+                            await MM.MakeRandomMove(nonPlayable);
                             return;
                         }
                     }
+                    await MM.MakeRandomMove(nonPlayable);
                     break;
                 case TypeOfNPC.Aggressive:
                     opponents = GM.GetCharactersInCell(initialCell);
@@ -147,29 +150,29 @@ namespace MazeRunner.Core.GameSystem
                                 neighbors.Remove(cell);
                                 continue;
                             }
-                            MM.MoveToken(nonPlayable, cell, delay);
+                            await MM.MoveToken(nonPlayable, cell, delay);
                             if(!cell.Equals(GM.maze.Grid[nonPlayable.X, nonPlayable.Y]) || nonPlayable.ActualState == State.Inactive) 
                             {
-                                GM.EventChangeInMazeMade();
+                                await GM.EventChangeInMazeMade();
                                 return;
                             }
                             initialLife = character.CurrentLife;
                             nonPlayable.Attack(character);
-                            GM.StabilizeToken(character);
+                            await GM.StabilizeToken(character);
                             if ((initialLife != character.MaxLife && character.CurrentLife == character.MaxLife) || character.ActualState == State.Inactive) 
                             {
-                                GM.EventDefetedToken(character, nonPlayable, 0);
+                                await GM.EventDefetedToken(character, nonPlayable, 0);
                                 return;
                             }
                             if (initialLife > character.CurrentLife)
                             {
-                                GM.EventDemagedToken(character, nonPlayable, initialLife - character.CurrentLife);
+                                await GM.EventDemagedToken(character, nonPlayable, initialLife - character.CurrentLife);
                             }
                             else if (initialLife < character.CurrentLife)
                             {
-                                GM.EventHealedToken(character, nonPlayable, character.CurrentLife - initialLife);
+                                await GM.EventHealedToken(character, nonPlayable, character.CurrentLife - initialLife);
                             }
-                            GM.EventChangeInMazeMade();
+                            await GM.EventChangeInMazeMade();
                             return;
                         }
                     }
@@ -178,22 +181,22 @@ namespace MazeRunner.Core.GameSystem
                     {
                         initialLife = character.CurrentLife;
                         nonPlayable.Attack(character);
-                        GM.StabilizeToken(character);
+                        await GM.StabilizeToken(character);
                         if ((initialLife != character.MaxLife && character.CurrentLife == character.MaxLife) || character.ActualState == State.Inactive) 
                         {
-                            GM.EventDefetedToken(character, nonPlayable, 0);
+                            await GM.EventDefetedToken(character, nonPlayable, 0);
                             return;
                         }
                         if (initialLife > character.CurrentLife)
                         {
-                            GM.EventDemagedToken(character, nonPlayable, initialLife - character.CurrentLife);
+                            await GM.EventDemagedToken(character, nonPlayable, initialLife - character.CurrentLife);
                         }
                         else if (initialLife < character.CurrentLife)
                         {
-                            GM.EventHealedToken(character, nonPlayable, character.CurrentLife - initialLife);
+                            await GM.EventHealedToken(character, nonPlayable, character.CurrentLife - initialLife);
                         }
-                        GM.EventChangeInMazeMade();
-                        MM.MakeRandomMove(nonPlayable);
+                        await GM.EventChangeInMazeMade();
+                        await MM.MakeRandomMove(nonPlayable);
                         return;
                     }
                     cells = MM.GetCellsInRange(initialCell, nonPlayable.Speed);
@@ -215,35 +218,36 @@ namespace MazeRunner.Core.GameSystem
                             {
                                 if (cells.Contains((neighbor, cellWithDistance.distance - delay)))
                                 {
-                                    MM.MoveToken(nonPlayable, neighbor, cellWithDistance.distance - delay);
+                                    await MM.MoveToken(nonPlayable, neighbor, cellWithDistance.distance - delay);
                                     if(!neighbor.Equals(GM.maze.Grid[nonPlayable.X, nonPlayable.Y]) || nonPlayable.ActualState == State.Inactive) 
                                     {
-                                        GM.EventChangeInMazeMade();
+                                        await GM.EventChangeInMazeMade();
                                         return;
                                     }
                                     Character character = opponents[random.Next(0, opponents.Count)];
                                     initialLife = character.CurrentLife;
                                     nonPlayable.Attack(character);
-                                    GM.StabilizeToken(character);
+                                    await GM.StabilizeToken(character);
                                     if ((initialLife != character.MaxLife && character.CurrentLife == character.MaxLife) || character.ActualState == State.Inactive) 
                                     {
-                                        GM.EventDefetedToken(character, nonPlayable, 0);
+                                        await GM.EventDefetedToken(character, nonPlayable, 0);
                                         return;
                                     }
                                     if (initialLife > character.CurrentLife)
                                     {
-                                        GM.EventDemagedToken(character, nonPlayable, initialLife - character.CurrentLife);
+                                        await GM.EventDemagedToken(character, nonPlayable, initialLife - character.CurrentLife);
                                     }
                                     else if (initialLife < character.CurrentLife)
                                     {
-                                        GM.EventHealedToken(character, nonPlayable, character.CurrentLife - initialLife);
+                                        await GM.EventHealedToken(character, nonPlayable, character.CurrentLife - initialLife);
                                     }
-                                    GM.EventChangeInMazeMade();
+                                    await GM.EventChangeInMazeMade();
                                     return;
                                 }
                             }
                         }
                     }
+                    await MM.MakeRandomMove(nonPlayable);
                     break;
                 default:
                     break;

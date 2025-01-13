@@ -276,16 +276,16 @@ namespace MazeRunner.Core.GameSystem
 
         }
 
-        public void TargetCharacters(List<Character> characters)
+        public async Task TargetCharacters(List<Character> characters)
         {
             foreach (Character character in characters)
             {
                 if(character.IsTargeted == false) character.ChangeTargetStatus();
             }
-            GM.EventChangeInMazeMade();
+            await GM.EventChangeInMazeMade();
         }
 
-        public void CleanTargets()
+        public async Task CleanTargets()
         {
             List<Player> players = [.. GM.ActivePlayers, .. GM.NonActivePlayers];
             foreach(Player player in players)
@@ -295,7 +295,7 @@ namespace MazeRunner.Core.GameSystem
                     if(token.IsTargeted == true) token.ChangeTargetStatus();
                 }
             }
-            GM.EventChangeInMazeMade();
+            await GM.EventChangeInMazeMade();
         }
     }
 }
