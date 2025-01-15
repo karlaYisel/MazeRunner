@@ -172,7 +172,7 @@ namespace MazeRunner.Core.GameSystem
                         parameter = [random.Next(1, 6)]; 
                         break;
                     case "DelayObstacle":
-                        parameter = [random.Next(1, 4), random.Next(2, 5)]; 
+                        parameter = [random.Next(1, 4)]; 
                         break;
                     case "PermanentDelayObstacle":
                         parameter = [random.Next(2, 5)]; 

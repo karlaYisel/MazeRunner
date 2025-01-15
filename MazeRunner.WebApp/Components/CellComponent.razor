@@ -13,18 +13,9 @@
     }
     else if(cell.Interactive is not null && cell.Interactive.ActualState == State.Active)
     {
-        <img style="z-index: 2;" src="@interactivePath" alt="@($"cell_{cell.X}_{cell.Y}.png")" class="img-fluid cell-image" @onclick="_OnClick">
-        @if(Thickness < 5)
-        {
-            @if(Thickness > 2)
-            {
-                <img style="z-index: 3;" src="img/cells/lotus.png" alt="@($"cell_{cell.X}_{cell.Y}.png")" class="img-fluid cell-image" @onclick="_OnClick">
-            }
-            @if(Thickness > 3)
-            {
-                <img style="z-index: 4;" src="img/cells/woods.png" alt="@($"cell_{cell.X}_{cell.Y}.png")" class="img-fluid cell-image" @onclick="_OnClick">
-            }
-        }
+        @if(Thickness == 2 || Thickness == 5) <img style="z-index: 2;" src="@interactivePath" alt="@($"cell_{cell.X}_{cell.Y}.png")" class="img-fluid cell-image" @onclick="_OnClick">
+        @if(Thickness == 3) <img style="z-index: 3;" src="img/cells/lotus.png" alt="@($"cell_{cell.X}_{cell.Y}.png")" class="img-fluid cell-image" @onclick="_OnClick">
+        @if(Thickness == 4) <img style="z-index: 4;" src="img/cells/woods.png" alt="@($"cell_{cell.X}_{cell.Y}.png")" class="img-fluid cell-image" @onclick="_OnClick">
     }
     @if(GM.EndPoints.Contains(cell))
     {
@@ -119,7 +110,7 @@
     private int Thickness{
         get{
             if(cell.Interactive is Obstacle obstacle) return obstacle.Delay;
-            else return 1;
+            else return 2;
         }
     }
     private string interactivePath {
