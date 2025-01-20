@@ -7,26 +7,26 @@
 <div class="center-content">
     <div class="container menu">
         <div class = "row justify-content-center">
-            <h1>Lista de Tokens:</h1>
+            <h1>Lista de Fichas:</h1>
         </div>
         <div class = "row justify-content-center">
         @foreach (var (characterType, index) in Enum.GetValues(typeof(TypeOfPlayableCharacter)).Cast<TypeOfPlayableCharacter>().Select((value, idx) => (value, idx)))
         {
-            <div class="col-xl-2 col-lg-2 col-md-4 col-sm-4 col-8">
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-4">
                 <div>
                     <ItemDisplay path="@($"img/tokens/{characterType}.png")" OnClick="(number) => AddToken(number)" number="@(index)" />
                 </div>
-                <p>@characterType</p>
+                <p>@(GetName(characterType.ToString()))</p>
             </div> 
         }
         </div>
         <div class = "row justify-content-center">
-            <h1>Tokens de @(GM.ActivePlayers[playerNumber].Name)</h1>
+            <h1>Fichas de @(GM.ActivePlayers[playerNumber].Name)</h1>
         </div>
         <div class = "row justify-content-center">
         @foreach (var (characterType, index) in charactersTypes.Select((value, idx) => (value, idx)))
         {
-            <div class="col-xl-2 col-lg-2 col-md-4 col-sm-4 col-8">
+            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-4">
                 <ItemDisplay path="@($"img/tokens/{characterType}.png")" OnClick="(number) => EraseToken(number)" number="@(index)" />
             </div> 
         }
@@ -55,6 +55,25 @@
         if (isConfirmed)
         {
             warningMessageIsActive = false;
+        }
+    }
+
+    private string GetName(string characterType)
+    {
+        switch(characterType)
+        {
+            case "Hero":
+                return "Héroe";
+            case "Thief":
+                return "Ladrón";
+            case "Healer":
+                return "Sanador";
+            case "Paladin":
+                return "Paladín";
+            case "Archer":
+                return "Arquero";
+            default:
+                return "";
         }
     }
 
@@ -99,6 +118,5 @@
             message = $"Necesitas tener {GM.NumberOfTokensByPlayers} tokens para continuar.";
             warningMessageIsActive = true;
         }
-        //confirmar los tokens colocar como los tokens del jugador, si el jugador es el ultimo pasar al juego, sino pasar al siguente jugador
     }
 }

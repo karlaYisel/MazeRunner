@@ -1,5 +1,5 @@
 .message-box {
-    position: fixed; /*fijarlo en toda la ventana y que sea fija en la ventana no en el padre*/
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -12,7 +12,11 @@
 }
 
 .container {
-    background-color: white; /*imagen*/
+    background-image: url('/img/background.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -48,10 +52,11 @@ h2.message {
 }
 
 .btn-message {
-    background-image: url('/img/menuBackground.png'); /*mejorar imagenes de todo background (menu y fondo) e icono*/
+    background-image: url('/img/menuBackground.png');
     background-size: 100% 100%;
     background-repeat: no-repeat; 
     background-position: center;
+    background-color: rgba(0, 0, 0, 0);
     border: none;
     border-radius: 5px;
     color: rgb(0, 0, 0);
@@ -66,5 +71,5 @@ h2.message {
 }
 
 .btn-message:hover {
-    background-color: #0056b3;
+    background-color: rgba(0, 0, 0, 0.201);
 }

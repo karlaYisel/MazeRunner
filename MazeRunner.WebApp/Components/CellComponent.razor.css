@@ -45,8 +45,10 @@
 
 .fire-1token-1, .fire-1token-2, .fire-2token-2, .ice-1token-1, .ice-1token-2, .ice-2token-2, .poison-1token-1, .poison-1token-2, .poison-2token-2{
     position: absolute;
-    width: 16.6%;
-    height: 16.6%;
+    max-width: 16%;
+    max-height: 16%;
+    width: 16%;
+    height: 16%;
     margin: 0;
     padding: 0;
 }
@@ -54,22 +56,24 @@
 .fire-1token-1, .ice-1token-1, .poison-1token-1{
     top: 25%;
     left: 25%;
+    transform: translate(-100%, 0);
 }
 
 .fire-1token-2, .ice-1token-2, .poison-1token-2{
     top: 0;
-    left: 0;
+    left: 50%;
 }
 
 .fire-2token-2, .ice-2token-2, .poison-2token-2{
     top: 50%;
     left: 50%;
+    transform: translate(-100%, 0);
 }
 
 .ice-1token-1, .ice-1token-2, .ice-2token-2{
-    transform: translate(100%, 0);
+    transform: translate(0, 105%);
 }
 
 .poison-1token-1, .poison-1token-2, .poison-2token-2{
-    transform: translate(200%, 0);
+    transform: translate(0, 210%);
 }

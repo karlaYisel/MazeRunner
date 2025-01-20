@@ -76,9 +76,9 @@ namespace MazeRunner.Core.GameSystem
                             break;
                     }
                     Type? enumType = Type.GetType(enumName);
-                    if (enumType is null) {return false; }
+                    if (enumType is null) {continue; }
                     classes = Enum.GetNames(enumType);
-                    if (classes is null) {return false; }
+                    if (classes is null) {continue; }
                     for (int i = 0; i < number; i++)
                     {
                         actualCell = emptyCells[random.Next(0, emptyCells.Count())];
@@ -172,10 +172,10 @@ namespace MazeRunner.Core.GameSystem
                         parameter = [random.Next(1, 6)]; 
                         break;
                     case "DelayObstacle":
-                        parameter = [random.Next(1, 4)]; 
+                        parameter = [random.Next(1, 4), random.Next(2, 5)]; 
                         break;
                     case "PermanentDelayObstacle":
-                        parameter = [random.Next(2, 5)]; 
+                        parameter = []; 
                         break;
                     case "SpikeTrap":
                         parameter = [random.Next(4, 11)]; 

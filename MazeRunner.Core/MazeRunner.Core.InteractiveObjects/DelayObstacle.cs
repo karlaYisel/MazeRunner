@@ -4,10 +4,12 @@ namespace MazeRunner.Core.InteractiveObjects
     {
         public int Lapse  { get; private set; }
 
-        public DelayObstacle(int Lapse)
+        public DelayObstacle(int Lapse, int Thickness)
         {
             this.ActualState = State.Inactive;
-            this.Delay = 2;
+            if(Thickness > 4) Thickness = 4;
+            if(Thickness < 2) Thickness = 2;
+            this.Delay = Thickness;
             this.Lapse = Lapse;
         }
 

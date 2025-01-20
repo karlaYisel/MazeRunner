@@ -2,53 +2,67 @@
 
 @page "/GameDisplay"
 
-<PageTitle>MazeRunner</PageTitle> <!--Considerar hacer el event de cange in maze made para que se vea lindo el movimiento-->
+<PageTitle>MazeRunner</PageTitle> 
 
 <div class="container center-content" id="page-container">
     <div class="container in-game-menu" id="player-menu">
-        <div class = "row justify-content-center">
-            <ItemDisplay path="@($"img/{numberOfActualPlayer}.png")" />
-        </div>        
-        <div class = "row justify-content-center">
-            @if(numberOfActualPlayer == 5)
-            {
-                <h2>NPC</h2>
-            }
-            else
-            {
-                <h2>Jugador @numberOfActualPlayer</h2>
-            }
-            <h3>@player.Name</h3>
-        </div>  
-        <div class = "row justify-content-center"> 
-            @switch(status)
-            {
-                case OperationStatus.ActionSelection:
-                    <button class="btn btn-menu" @onclick="() => status = OperationStatus.TokenSelection">Seleccionar Token</button>
-                    break;
-                case OperationStatus.TokenAction:
-                    @if(selectedToken is PlayableCharacter playable)
-                    {
-                        <button class="btn btn-menu" @onclick="Move">Mover</button> 
-                        <button class="btn btn-menu" @onclick="Attack">Atacar</button> 
-                        <button class="btn btn-menu" @onclick="Ability">Especial</button>
-                    }
-                    break;
-                default:
-                    break;
-            }
-            @if(status !=  OperationStatus.Break && status != OperationStatus.MovingToken && status != OperationStatus.AttackingToken && status != OperationStatus.UsingAbilityToken)
-            {
-                @if(status != OperationStatus.ActionSelection)
+        <div class="fill-content">
+            <div class = "row justify-content-center" >
+                <div style="min-width: 94px; width: 50%;">
+                    <ItemDisplay path="@($"img/{numberOfActualPlayer}.png")" />
+                </div>
+            </div>        
+            <div class = "row justify-content-center">
+                @if(numberOfActualPlayer == 5)
                 {
-                    <button class="btn btn-menu" @onclick="Back">Atrás</button>
+                    <h2>NPC</h2>
                 }
-                <button class="btn btn-menu" @onclick="PassTurn">Pasar Turno</button>
-            }
+                else
+                {
+                    <h2>Jugador @numberOfActualPlayer</h2>
+                }
+                <h3>@player.Name</h3>
+            </div>  
+                @switch(status)
+                {
+                    case OperationStatus.ActionSelection:
+                        <div class = "row justify-content-center"> 
+                            <button class="btn btn-menu col-xl-10 col-lg-10 col-md-10 col-sm-10 col-10" @onclick="() => status = OperationStatus.TokenSelection">Seleccionar Token</button>
+                        </div>
+                        break;
+                    case OperationStatus.TokenAction:
+                        @if(selectedToken is PlayableCharacter playable)
+                        {
+                            <div class = "row justify-content-center"> 
+                                <button class="btn btn-menu col-xl-10 col-lg-10 col-md-10 col-sm-10 col-10" @onclick="Move">Mover</button> 
+                            </div>
+                            <div class = "row justify-content-center"> 
+                                <button class="btn btn-menu col-xl-10 col-lg-10 col-md-10 col-sm-10 col-10" @onclick="Attack">Atacar</button> 
+                            </div>
+                            <div class = "row justify-content-center"> 
+                                <button class="btn btn-menu col-xl-10 col-lg-10 col-md-10 col-sm-10 col-10" @onclick="Ability">Especial</button>
+                            </div>
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                @if(status !=  OperationStatus.Break && status != OperationStatus.MovingToken && status != OperationStatus.AttackingToken && status != OperationStatus.UsingAbilityToken)
+                {
+                    @if(status != OperationStatus.ActionSelection)
+                    {
+                        <div class = "row justify-content-center"> 
+                            <button class="btn btn-menu col-xl-10 col-lg-10 col-md-10 col-sm-10 col-10" @onclick="Back">Atrás</button>
+                        </div>
+                    }
+                    <div class = "row justify-content-center"> 
+                        <button class="btn btn-menu col-xl-10 col-lg-10 col-md-10 col-sm-10 col-10" @onclick="PassTurn">Pasar Turno</button>
+                    </div>
+                }
         </div>
     </div>
     <div class="maze-box">
-        <div class="cells-grid container" style="min-width: @(16*GM.maze.Width)px;">
+        <div class="cells-grid container" style="min-width: @(32*GM.maze.Width)px;">
             @for (int x = 0; x < GM.maze.Grid.GetLength(0); x++)
             {
                 <div class="row justify-content-center">
@@ -60,36 +74,51 @@
             }
         </div>
     </div>
-    <div class="textbox"> 
-        @for(int i = textForTextbox.Count - 1; i >= 0; i--)
-        {
-            <p>@textForTextbox[i]</p>
-        }
+    <div class="textbox in-game-menu"> 
+        <div class="fill-content container">
+            <div class="row justify-content-center">
+                <h3></h3>
+            </div>
+            @for(int i = textForTextbox.Count - 1; i >= 0; i--)
+            {
+                <div class="row justify-content-center">
+                    <h3>@textForTextbox[i]</h3>
+                </div>
+            }
+        </div>
     </div>
     <div class="container in-game-menu" id="token-menu">
-        @if(selectedToken is not null)
-        {
-            <div class = "row justify-content-center">
-                <ItemDisplay path="@($"img/tokens/{selectedToken.GetType().Name}.png")" />
-            </div>        
-            <div class = "row justify-content-center">
-                <h2>@selectedToken.GetType().Name</h2>
-                <h3>Token de @playerIdx(GM.GetNumberOfPlayerByToken(selectedToken)).Name</h3>
-            </div>
-            <div class = "row justify-content-center">
-                <h3>Vida: @(selectedToken.CurrentLife)/@(selectedToken.MaxLife)</h3>
-                <h3>Defensa: @(selectedToken.Defense)</h3>
-                <h3>Fuerza: @(selectedToken.Strength)</h3>
-                <h3>Destreza: @(selectedToken.Ability)</h3>
-                <h3>Velocidad: @(selectedToken.Speed)</h3>
-                @if(selectedToken is PlayableCharacter playable)
-                {
-                    <h3>Ataque: @(playable.TypeOfAttack.ToString())</h3>
-                    <h3>Especial: @((GM.Turn - playable.LastTurnUsingAbility >= playable.AbilityRecoveryTime)? playable.AbilityRecoveryTime: GM.Turn - playable.LastTurnUsingAbility)/@(playable.AbilityRecoveryTime)</h3>
-                }
-            </div>
-            
-        }
+        <div class="fill-content">
+            @if(selectedToken is not null)
+            { 
+                <div class = "row justify-content-center">
+                    <div style="min-width: 94px; width: 50%;">
+                        <ItemDisplay path="@($"img/tokens/{selectedToken.GetType().Name}.png")" />
+                    </div>
+                </div>        
+                <div class = "row justify-content-center">
+                    <h2>@selectedToken.GetType().Name</h2>
+                    <h3>Ficha de @playerIdx(GM.GetNumberOfPlayerByToken(selectedToken)).Name</h3>
+                </div>
+                <div class = "row justify-content-center">
+                    <h3>Vida: @(selectedToken.CurrentLife)/@(selectedToken.MaxLife)</h3>
+                    <h3>Defensa: @(selectedToken.Defense)</h3>
+                    <h3>Fuerza: @(selectedToken.Strength)</h3>
+                    <h3>Destreza: @(selectedToken.Ability)</h3>
+                    <h3>Velocidad: @(selectedToken.Speed)</h3>
+                    @if(selectedToken is PlayableCharacter playable)
+                    {
+                        <h3>Ataque: @(GetName(playable.TypeOfAttack.ToString()))</h3>
+                        <h3>Especial: @((GM.Turn - playable.LastTurnUsingAbility >= playable.AbilityRecoveryTime)? playable.AbilityRecoveryTime: GM.Turn - playable.LastTurnUsingAbility)/@(playable.AbilityRecoveryTime)</h3>
+                    }
+                </div>
+                
+            }
+            else{
+                <p></p>
+                <h3>Seleccione una ficha para ver sus estadísticas</h3>
+            }
+        </div>
     </div>
 </div>
 
@@ -142,9 +171,6 @@
     }
     private OperationStatus status = OperationStatus.ActionSelection;
     private Character? selectedToken = null;
-    //css edit
-    //poner menu en la barra cuando estamos en esta pagina y sus respectivas funciones
-    //estilizar
     private enum OperationStatus
     {
         Break,
@@ -177,6 +203,21 @@
         GM.ChangeInMazeMade += RefreshMaze;
         await AddText(["El juego ha comenzado."]);
         await AddText([$"Turno del jugador {numberOfActualPlayer}, {player.Name}."]);
+    }
+
+    private string GetName(string attackType)
+    {
+        switch(attackType)
+        {
+            case "Short":
+                return "Corto";
+            case "Large":
+                return "Largo";
+            case "Distance":
+                return "Distancia";
+            default:
+                return "";
+        }
     }
 
     private Player playerIdx(int index)
@@ -674,7 +715,7 @@
         string text;
         if (modificator >= 0 && modificator < 3)
         {
-            string effect = (modificator == 0)? "Burned" : (modificator == 1)? "Iced" : "Poisoned";
+            string effect = (modificator == 0)? "Ardiendo" : (modificator == 1)? "Congelado" : "Envenenado";
             text = $"{affectedCharacter.GetType().Name} ha obtenido el efecto {effect}";
             if (modificaterObject is not null) text += $" debido a {modificaterObject.GetType().Name}.";
             else text += ".";
@@ -694,7 +735,7 @@
         string text;
         if (modificator >= 0 && modificator < 3)
         {
-            string effect = (modificator == 0)? "Burned" : (modificator == 1)? "Iced" : "Poisoned";
+            string effect = (modificator == 0)? "Ardiendo" : (modificator == 1)? "Congelado" : "Envenenado";
             text = $"{affectedCharacter.GetType().Name} ha perdido el efecto {effect}";
             if (modificaterObject is not null) text += $" gracias a {modificaterObject.GetType().Name}.";
             else text += ".";
@@ -729,7 +770,7 @@
                     break;
                 case "FireTrap" or "IceTrap" or "PoisonTrap":
                     string type = (modificaterObject is FireTrap)? "pasos" : "turnos";
-                    string effect = (modificaterObject is FireTrap)? "Burned" : (modificaterObject is IceTrap)? "Iced" : "Poisoned";
+                    string effect = (modificaterObject is FireTrap)? "Ardiendo" : (modificaterObject is IceTrap)? "Congelado" : "Envenenado";
                     await AddText([$"{affectedCharacter.GetType().Name} tendrá el efecto {effect} aumentado en {modificator} {type} por {modificaterObject.GetType().Name}."]);
                     break;
                 default:

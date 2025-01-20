@@ -1,0 +1,139 @@
+@inject NavigationManager NavMg
+
+@page "/MazeCreator"
+
+<PageTitle>MazeRunner</PageTitle>
+
+<div class="center-content">
+    <div class="container menu">
+        <div class = "row justify-content-center">
+            <h1>Editor del Laberinto</h1>
+        </div>
+        <div class = "row justify-content-center" style="margin: 3% 0;">
+            <p class="col-xl-2 col-lg-2 col-md-2 col-sm-3 col-5">Dimensión:</p>
+            <input class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-5" type="number" @bind="size" placeholder="11" />
+            <p class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-5">Fichas:</p>
+            <input class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-5" type="number" @bind="numberOfTokens" placeholder="3" />
+        </div>
+        <div class = "row justify-content-center" style="margin: 3% 0;">
+            <p class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-5">Obstáculos:</p>
+            <input class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-5" type="number" @bind="numberOfObstacles" placeholder="10" />
+            <p class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-5">Trampas:</p>
+            <input class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-5" type="number" @bind="numberOfTraps" placeholder="10" />
+            <p class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-5">NPCs:</p>
+            <input class="col-xl-2 col-lg-2 col-md-3 col-sm-3 col-5" type="number" @bind="numberOfNPCs" placeholder="10" />
+        </div>
+        <div class = "row justify-content-center">
+            <button class="btn btn-menu" @onclick="TryStart">Continuar</button>
+        </div>
+    </div>
+</div>
+
+@if(warningMessageIsActive)
+{
+<MessageBox title="Opción Inválida" message="@message" btnMessageConfirm="De Acuerdo" isWithTwoButtons="false" OnConfirm="Confirm"/>
+}
+
+@code{
+    static GameManager GM = GameManager.GM;
+    static GeneratorManager GeM = GeneratorManager.GeM;
+    private bool warningMessageIsActive = false;
+    string message = "Pruebe a reducir el número de interactuables.";
+    private int _size = 11;
+    private int _tokens = 3;
+    private int _obstacles = 10;
+    private int _traps = 10;
+    private int _npcs = 10;
+
+    int size{
+        get{
+            return _size;
+        }
+        set{
+            if(value < 11) _size = 11;
+            else if (value > 51) _size = 51;
+            else if (value%2 == 0) _size = value + 1;
+            else _size = value;
+        }
+    }
+    
+    int numberOfTokens{
+        get{
+            return _tokens;
+        }
+        set{
+            if(value < 1) _tokens = 1;
+            else if (value > 5) _tokens = 5;
+            else _tokens = value;
+        }
+    }
+    
+    int numberOfObstacles{
+        get{
+            return _obstacles;
+        }
+        set{
+            if(value < 5) _obstacles = 5;
+            else if (value > 500) _obstacles = 500;
+            else _obstacles = value;
+        }
+    }
+    
+    int numberOfTraps{
+        get{
+            return _traps;
+        }
+        set{
+            if(value < 5) _traps = 5;
+            else if (value > 500) _traps = 500;
+            else _traps = value;
+        }
+    }
+    
+    int numberOfNPCs{
+        get{
+            return _npcs;
+        }
+        set{
+            if(value < 5) _npcs = 5;
+            else if (value > 100) _npcs = 100;
+            else _npcs = value;
+        }
+    }
+    
+    private void Confirm(bool isConfirmed)
+    {
+        if (isConfirmed)
+        {
+            warningMessageIsActive = false;
+        }
+    }
+
+    private void TryStart()
+    {
+        Maze maze = new Maze(size, size);
+        bool isCoopGame = false;
+        bool playWithBots = false;
+        List<Cell> startPoints = (numberOfTokens == 1) ? new List<Cell>([maze.Grid[0, 0], maze.Grid[size - 1, size - 1], maze.Grid[size - 1, 0], maze.Grid[0, size - 1]]):
+                                 ((numberOfTokens == 2) ? new List<Cell>([maze.Grid[1, 0], maze.Grid[size - 1, size - 2], maze.Grid[size - 2, size - 1], maze.Grid[0, 1], maze.Grid[size - 1, 1], maze.Grid[1, size - 1], maze.Grid[0, size - 2], maze.Grid[size - 2, 0]]):
+                                 ((numberOfTokens == 3) ? new List<Cell>([maze.Grid[1, size - 1], maze.Grid[0, 0], maze.Grid[size - 1, 1], maze.Grid[size - 2, 0], maze.Grid[size - 1, size - 1], maze.Grid[0, size - 2], maze.Grid[0, 1], maze.Grid[size - 1, 0], maze.Grid[size - 2, size - 1], maze.Grid[size - 1, size - 2], maze.Grid[0, size - 1], maze.Grid[1, 0]]):
+                                 ((numberOfTokens == 4) ? new List<Cell>([maze.Grid[2, size - 1], maze.Grid[0, 1], maze.Grid[1, 0], maze.Grid[size - 1, 2], maze.Grid[size - 3, 0], maze.Grid[size - 1, size - 2], maze.Grid[size - 2, size - 1], maze.Grid[0, size - 3], maze.Grid[0, 2], maze.Grid[size - 2, 0], maze.Grid[size - 1, 1], maze.Grid[size - 3, size - 1], maze.Grid[size - 1, size - 3], maze.Grid[1, size - 1], maze.Grid[0, size - 2], maze.Grid[2, 0]]):
+                                 new List<Cell>([maze.Grid[size - 1, size - 1], maze.Grid[2, size - 1], maze.Grid[0, 1], maze.Grid[1, 0], maze.Grid[size - 1, 2], maze.Grid[0, 0],  maze.Grid[size - 3, 0], maze.Grid[size - 1, size - 2], maze.Grid[size - 2, size - 1], maze.Grid[0, size - 3], maze.Grid[0, size - 1], maze.Grid[0, 2], maze.Grid[size - 2, 0], maze.Grid[size - 1, 1], maze.Grid[size - 3, size - 1], maze.Grid[size - 1, 0], maze.Grid[size - 1, size - 3], maze.Grid[1, size - 1], maze.Grid[0, size - 2], maze.Grid[2, 0]]))));
+        List<Cell> endPoints = new List<Cell>([maze.Grid[size/2, size/2]]);
+        GM.InitializeLevel(isCoopGame, playWithBots, maze, startPoints, endPoints, numberOfObstacles, numberOfTraps, numberOfNPCs, numberOfTokens);
+        GM.NonActivePlayers[GM.NonActivePlayers.Count - 1].ClearTokens();
+        if (!GeM.TryGenerateNPCs(GM.InitialNumberOfNPCs))
+        {
+            message = "Error en la generación de los NPCs.<br />Intente poner un número dentro de los límites del laberinto.";
+            warningMessageIsActive = true;
+            return;
+        }
+        if (!GeM.TryGenerateInteractiveObjects(GM.InitialNumberOfObstacles, GM.InitialNumberOfTraps))
+        {
+            message = "Error en la generación de los Interactuables.<br />Intente poner un número dentro de los límites del laberinto.";
+            warningMessageIsActive = true;
+            return;
+        }
+        NavMg.NavigateTo("/TokensConfiguration");        
+    }
+}

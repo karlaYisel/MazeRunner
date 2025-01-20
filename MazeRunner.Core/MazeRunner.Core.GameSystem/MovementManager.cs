@@ -56,6 +56,7 @@ namespace MazeRunner.Core.GameSystem
             distance = optimalPath.Count;
             Queue<Cell> path = new Queue<Cell>();
             cell = GM.maze.Grid[token.X, token.Y];
+            Cell lastCell = cell;
             int delay;
             await CleanColor();
             for (int i = 0; i < distance; i++) 
@@ -65,13 +66,14 @@ namespace MazeRunner.Core.GameSystem
                     await CleanColor();
                     return;
                 }
-                await ColorCells([cell]);
+                lastCell = cell;
                 path.Enqueue(cell);
                 cell = optimalPath.Pop(); 
                 if (cell.Interactive is Obstacle obstacle && obstacle.ActualState == State.Active) delay = obstacle.Delay;
                 else delay = 1;
                 await Task.Delay(delay*200);
                 token.ChangePosition(cell.X, cell.Y);
+                await ColorCells([lastCell]);
                 await GM.EventChangeInMazeMade();
                 if(token.RemainingStepsBurned > 0)
                 {

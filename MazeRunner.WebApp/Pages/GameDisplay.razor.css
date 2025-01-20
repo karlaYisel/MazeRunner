@@ -1,7 +1,7 @@
 #page-container{
     position: relative;
-    width: 100vw;
-    height: 90vh;
+    width: 80vw;
+    height: 85vh;
     margin: 0;
     padding: 0;
     line-height: 0;
@@ -20,7 +20,7 @@
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(16px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(32px, 1fr));
     aspect-ratio: 1 / 1;
     row-gap: 0;
     column-gap: 0;
@@ -28,27 +28,62 @@
     position: absolute;
 }
 
-.row {
-    margin: 0;
-    padding: 0;
+.maze-box .row {
     aspect-ratio: 1 / 1; 
 }
 
+#player-menu .row {
+    margin-bottom: 3px;
+}
+
+.row {
+    margin: 0;
+    padding: 0;
+}
+
 .textbox{
+    position: relative;
+    overflow: hidden;
+}
+
+.fill-content{
+    position: absolute;
+    padding: 0;
+    margin: 5%;
+    height: 90%;
+    width: 90%;
     overflow: auto;
 }
 
-@media(min-width: calc(90vh))
+h2{
+    font-size: 2rem;
+}
+
+h3{
+    font-size: 1.5rem;
+}
+
+.textbox h3{
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+}
+
+.in-game-menu, .textbox{
+    margin: 0;
+    padding: 0;
+}
+
+@media(min-width: calc(85vh + 20vw))
 {
-    @media(min-width: calc(90vh + 300px))
+    @media(min-width: calc(85vh + 20vw + 200px))
     {
         .in-game-menu{
             overflow: auto;
-            width: calc((100vw - 90vh)/2);
+            width: calc((80vw - 85vh)/2);
         }
 
         #player-menu{
-            height: 90vh;
+            height: 85vh;
             position: absolute;
             top: 0;
             left: 0;
@@ -58,31 +93,31 @@
             height: 60vh;
             position: absolute;
             bottom: 0;
-            left: calc((100vw + 90vh)/2);
+            left: calc((80vw + 85vh)/2);
         }
 
         .maze-box{
-            height: 90vh;
+            height: 85vh;
             position: absolute;
             top: 0;
-            left: calc((100vw - 90vh)/2);
+            left: calc((80vw - 85vh)/2);
         }
 
         .textbox{
             overflow: auto;
-            width: calc((100vw - 90vh)/2);
-            height: 30vh;
+            width: calc((80vw - 85vh)/2);
+            height: 25vh;
             position: absolute;
             top: 0;
-            left: calc((100vw + 90vh)/2);
+            left: calc((80vw + 85vh)/2);
         }
     }
-    @media(max-width: calc(90vh+ 300px - 0.5px))
+    @media(max-width: calc(85vh + 20vw + 200px))
     {
         .in-game-menu{
             overflow: auto;
-            width: 200px;
-            height: 90vh;
+            width: 150px;
+            height: 85vh;
             position: absolute;
             top: 0;
         }
@@ -92,73 +127,73 @@
         }
 
         #token-menu{
-            left: calc((100vw + 400px)/2);;
+            left: calc(80vw - 150px);
         }
 
         .maze-box{
-            width: calc((100vw - 400px)/2);
+            width: calc(80vw - 300px);
             position: absolute;
             bottom: 0;
-            left: 200px;
+            left: 150px;
         }
 
         .textbox{
             overflow: auto;
-            width: calc((100vw - 400px)/2);
-            height: calc(90vh + 400px - 100vw);
+            width: calc(80vw - 300px);
+            height: calc(85vh + 300px - 80vw);
             position: absolute;
             top: 0;
-            left: 200px;
+            left: 150px;
         }
     }
 }
 
-@media(max-width: calc(90vh - 0.5px))
+@media(max-width: calc(85vh + 20vw))
 {
-    @media(max-width: calc(90vh- 300px - 0.5px))
+    @media(max-width: calc(85vh + 20vw - 200px))
     {
         .in-game-menu{
             overflow: auto;
-            height: calc((90vh - 100vw)/2);
+            height: calc((85vh - 80vw)/2);
         }
 
         #player-menu{
-            width: 100vw;
+            width: 80vw;
             position: absolute;
             top: 0;
             left: 0;
         }
 
         #token-menu{
-            width: 70vw;
+            width: 50vw;
             position: absolute;
-            bottom: 0;
-            left: 30vh;
+            top: calc((85vh + 80vw)/2);
+            left: 30vw;
         }
 
         .maze-box{
-            width: 100%;
+            width: 80vw;
             position: absolute;
-            top: calc((90vh - 100vw)/2);
+            top: calc((85vh - 80vw)/2);
             left: 0;
         }
 
         .textbox{
             overflow: auto;
-            height: calc((90vh - 100vw)/2);
+            height: calc((85vh - 80vw)/2);
             width: 30vw;
             position: absolute;
-            bottom: 0;
+            top: calc((85vh + 80vw)/2);
             left: 0;
         }
     }
 
-    @media(min-width: calc(90vh- 300px))
+    @media(min-width: calc(85vh + 20vw - 200px))
     {
         .in-game-menu{
             overflow: auto;
-            height: 200px;
-            width: 100vw;
+            height: 150px;
+            width: 80vw;
             position: absolute;
             left: 0;
         }
@@ -172,18 +207,18 @@
         }
 
         .maze-box{
-            height: calc(90vh - 400px);
+            height: calc(85vh - 300px);
             position: absolute;
-            top: 200px;
-            left: calc(100vw + 400px - 90vh);
+            top: 150px;
+            left: calc(80vw + 300px - 85vh);
         }
 
         .textbox{
             overflow: auto;
-            height: calc(90vh - 400px);
-            width: calc(100vw + 400px - 90vh);
+            height: calc(85vh - 300px);
+            width: calc(80vw + 300px - 85vh);
             position: absolute;
-            top: 200px;
+            top: 150px;
             left: 0;
         }
     }

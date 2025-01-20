@@ -9,14 +9,18 @@
         <div class = "row justify-content-center">
             <h1>¿Cuantos jugadores son?</h1>
         </div>
-        <div class = "row justify-content-center">
+        <div class = "row justify-content-center" style="margin: 3% 0;">
         @foreach (var (name, index) in names.Select((value, idx) => (value, idx)))
         {
-            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                <div>
-                    <ItemDisplay path="@(numberOfPlayers > index ? $"img/{index + 1}.png": $"img/{index + 1}n.png")" OnClick="(number) => ChangeNumberOfPlayers(number)" number="@(index + 1)" />
+            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-6 container">
+                <div class = "row justify-content-center">
+                    <div class="col-10 cell">
+                        <ItemDisplay path="@(numberOfPlayers > index ? $"img/{index + 1}.png": $"img/{index + 1}n.png")" OnClick="(number) => ChangeNumberOfPlayers(number)" number="@(index + 1)" />
+                    </div> 
                 </div> 
-                <input type="text" @bind="names[index]" placeholder="@(numberOfPlayers > index ? $"Jugador {index + 1}": $"Bot {index + 1 - numberOfPlayers}")" />
+                <div class = "row justify-content-center">
+                    <input class="col-8" type="text" @bind="names[index]" placeholder="@(numberOfPlayers > index ? $"Jugador {index + 1}": $"Bot {index + 1 - numberOfPlayers}")" />
+                </div> 
             </div> 
         }
         </div>
@@ -31,7 +35,7 @@
 <MessageBox title="Opción Inválida" message="Hasta ahora solo se permiten de 2 a 4 jugadores." btnMessageConfirm="De Acuerdo" isWithTwoButtons="false" OnConfirm="Confirm"/>
 }
 
-@code { /*arreglar la imagen poner estilo al texto y textbox y arreglar disposicion*/
+@code {
     static GameManager GM = GameManager.GM;
     static GeneratorManager GeM = GeneratorManager.GeM;
     private bool warningMessageIsActive = false;
@@ -58,23 +62,6 @@
     private void TryStart()
     {
         GM.InitializePlayers(numberOfPlayers, names);
-        /*todo esto mas adelante hacer una pagina para que sea configurable*/
-        Maze maze = new Maze(11, 11);
-        bool isCoopGame = false;
-        bool playWithBots = false;
-        int numberOfObstacles = 10;
-        int numberOfTraps = 10;
-        int numberOfNPCs = 10;
-        int numberOfTokens = 3;
-        List<Cell> startPoints = new List<Cell>([maze.Grid[1, 10], maze.Grid[0, 0], maze.Grid[10, 1]
-                                               , maze.Grid[9, 0], maze.Grid[10, 10], maze.Grid[0, 9]
-                                               , maze.Grid[0, 1], maze.Grid[10, 0], maze.Grid[9, 10]
-                                               , maze.Grid[10, 9], maze.Grid[0, 10], maze.Grid[1, 0]]);
-        List<Cell> endPoints = new List<Cell>([maze.Grid[5, 5]]);
-        GM.InitializeLevel(isCoopGame, playWithBots, maze, startPoints, endPoints, numberOfObstacles, numberOfTraps, numberOfNPCs, numberOfTokens);
-        GM.NonActivePlayers[GM.NonActivePlayers.Count - 1].ClearTokens();
-        GeM.TryGenerateNPCs(GM.InitialNumberOfNPCs);
-        GeM.TryGenerateInteractiveObjects(GM.InitialNumberOfObstacles, GM.InitialNumberOfTraps);
-        NavMg.NavigateTo("/TokensConfiguration");       
+        NavMg.NavigateTo("/MazeCreator");       
     }
 }

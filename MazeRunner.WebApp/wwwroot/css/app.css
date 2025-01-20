@@ -19,7 +19,8 @@ html, body {
 }
 
 .page {
-    height: 100%;
+    height: 100vh;
+    width: 100vw;
 }
 
 .top-row {
@@ -29,46 +30,91 @@ html, body {
 }
 
 .content {
-    height: 90%;
+    height: 85vh;
     padding-top: 1.1rem;
 }
 
 .center-content {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
+    align-items: center; 
+    justify-content: center; 
+    min-height: 100%; 
+    width: 100%; 
 }
 
-.menu, .btn-menu {
+.menu .row, .in-game-menu .row {
+    padding: 0 2%;
+}
+
+.cell {
+    display: block;
+    margin: 0;
+    padding: 0;
+    aspect-ratio: 1 / 1;
+}
+
+.menu, .in-game-menu
+{
+    padding-top: 3%;
+    padding-bottom: 3%;
+}
+
+.menu, .btn-menu, .in-game-menu {
     background-image: url('/img/menuBackground.png');
     background-size: 100% 100%;
     background-repeat: no-repeat; 
     background-position: center;
-    border-radius: 5px;
     justify-content: center;
     text-align: center;
     text-decoration: none;
+    overflow: auto;
 }
 
 .btn-menu {
-    width: 60%;
+    width: 40%;
     color: rgb(0, 0, 0);
-    margin: 15px;
+    margin: 5px;
     padding: 5px;
+    transition: background-color 0.3s;
+    overflow: hidden;
 }
 
-.btn-menu:hover {
+.btn-menu:hover, a:hover {
     color: rgb(41, 57, 66);
 }
 
-.btn-menu:focus {
+.btn-menu:focus, a:focus, input:focus {
+    outline: 1px solid #00000000;
     color: rgb(92, 111, 121);
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 a {
-    color:rgb(27, 145, 208);
+    color:rgb(0, 0, 0);
     text-decoration: none;
+}
+
+input {
+    background-image: url('/img/menuBackground.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat; 
+    background-position: center;
+    border: none;
+    background-color: rgba(0, 0, 0, 0);
+    justify-content: center;
+    text-align: center;
+    margin-top: 1.1rem;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] { 
+    appearance: textfield; 
+    -moz-appearance:textfield; 
 }
 
 /**/
@@ -85,10 +131,6 @@ h1:focus {
     color: rgb(55, 73, 83);
     background-color: #1b6ec2;
     border-color: #1861ac;
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .valid.modified:not([type=checkbox]) {
