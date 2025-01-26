@@ -247,8 +247,6 @@ namespace MazeRunner.Core.GameSystem
             
             return opponents;
         }
-
-        //public void StabilizeEffects(Character token) {}
     
         public List<Cell> GetCellsAtDistance (Cell initialCell, int distance)
         {
