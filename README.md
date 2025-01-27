@@ -1,5 +1,12 @@
 <div align="center"> <img src="https://github.com/karlaYisel/MazeRunner/blob/main/MazeRunner.WebApp/wwwroot/img/MazeRunner.png" width="400"> </div>
 <h1 align=center> Maze Runner: </h1>
+<div align="center">Karla Yisel Ramírez Garcell CC-121</div>
+<div aling="center"><a href="matcom">MATCOM</a> 1er año, proyecto #1</div>
+
+<h2 align=center> Descripción: </h2>
+<div align="justify">
+	<p>Juego web multijugador con temática de escape de laberinto de 2 a 4 jugadores, ambientados en un mapa antiguo. Cada partida es única, gracias a la generación dinámica del laberinto, con obstáculos y trampas para aumentar su dificultad. Tiene 5 fichas para escoger quienes le representaran en su recorrido, cada una con habilidades especiales (con un tiempo de enfriamiento) y estadísticas propias. En su turno, puede seleccionar cada una de sus fichas, moviéndolas en dependencia de su velocidad por todo el tablero, atacando fichas enemigas o usando su habilidad; todo con el objetivo de llegar al castillo central dentro del mismo, siendo victorioso el primero en llegar. Además, cuenta con fichas NPC con 3 niveles de interacción y una interfaz gráfica intuitiva.</p>
+</div>
 
 <h2 align=center> Como ejecutar el juego: </h2>
 <div align="justify">
@@ -8,6 +15,7 @@
   <li>Aparecerá en su consola el directorio http del proyecto que puede copiar y pegar en su navegador o abrir automático con Ctrl + Click.</li>
   <li>Disfrutar del juego.</li>
 </ol>
+También se puede recurrir a otras opciones, como subir los archivos a un servicio de hosting para publicar el juego en un sitio web en línea.
 </div>
 
 <h2 align=center> Estructura del juego: </h2>
