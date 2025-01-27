@@ -1,7 +1,7 @@
 <div align="center"> <img src="https://github.com/karlaYisel/MazeRunner/blob/main/MazeRunner.WebApp/wwwroot/img/MazeRunner.png" width="400"> </div>
 <h1 align=center> Maze Runner: </h1>
 <div align="center">Karla Yisel Ramírez Garcell CC-121</div>
-<div aling="center"><a href="matcom">MATCOM</a> 1er año, proyecto #1</div>
+<div align="center"><a href="matcom">MATCOM</a> 1er año, proyecto #1</div>
 
 <h2 align=center> Descripción: </h2>
 <div align="justify">
